@@ -1,0 +1,11 @@
+Pckage: tdatools
+Type: Package
+Title: Internal Pipeline for Peter Bubenik's TDA Group at the University of Florida.
+Version: 1.0
+Date: 2018-05-15
+Author: Jose Bouza
+Maintainer: Jose Bouza <josejbouza@gmail.com>
+Description: Write this.
+License: GPL (>= 2)
+Imports: Rcpp (>= 0.12.16)
+LinkingTo: Rcppackage: tdatools
