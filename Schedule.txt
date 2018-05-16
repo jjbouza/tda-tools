@@ -1,5 +1,0 @@
-Week 1: Implement initial versions of wrappers for Ripser and PL toolbox into R.
-
-
-Week 3: Start working on full package described in Development.md
-Week 6-7: Have a final working version of the full package for Python and R.
