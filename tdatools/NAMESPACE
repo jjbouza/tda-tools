@@ -1,3 +1,0 @@
-useDynLib(tdatools)
-exportPattern("^[[:alpha:]]+")
-importFrom(Rcpp, evalCpp)
