@@ -7,7 +7,9 @@ library('tdatools')
 # [0,0], [1,0], [0,1]
 point_vector <- c(0,1, 1,1, 1,0, 1,-1, 0,-1, -1,-1, -1,0, -1,1)
 point_mat <- t(matrix(point_vector, nrow=2, ncol=8))
-dist_mat = as.vector(dist(point_mat))
+dm = dist(point_mat)
 
-
-rip(dist_mat, 2, 2, 10, 1)
+cat("\n \n \n Point Cloud Calculation: \n")
+rip_pc(point_mat, 2, 2, 10, 1)
+cat("\n \n \n Distance matrix Calculation: \n")
+rip_dm(dm, 2, 2, 10, 1)

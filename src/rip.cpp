@@ -946,8 +946,40 @@ void ripser<sparse_distance_matrix>::assemble_columns_to_reduce(
 }
 
 
+Rcpp::List ripserResultToR(ripserResults inp){
+	Rcpp::List ret;
+	//Correctly format persistence pairs into a matrix.
+	auto pairs = std::vector<Rcpp::NumericMatrix>();
+	for(auto dim : inp.births_and_deaths_by_dim){
+		Rcpp::NumericVector rep = Rcpp::wrap(dim);
+		rep.attr("dim") = Rcpp::Dimension(2,static_cast<int>(dim.size()/2));
+		Rcpp::NumericMatrix m = Rcpp::as<Rcpp::NumericMatrix>(rep);
+		pairs.push_back(Rcpp::transpose(m));
+	}
+	ret["pairs"] = pairs;
+
+	auto reps = std::vector<std::vector<Rcpp::NumericVector>>();
+	//We want to return cocycles as a list (dim) of lists (PD point) of matricies (repinpesentitive).
+	int dim_cnt = 2;
+	for(auto dim : inp.cocycles_by_dim){
+		std::vector<Rcpp::NumericVector> dim_vec = std::vector<Rcpp::NumericVector>();
+		for(auto point : dim){
+			Rcpp::NumericVector rep = Rcpp::wrap(point);
+			rep.attr("dim") = Rcpp::Dimension(static_cast<int>(point.size()/dim_cnt), dim_cnt);
+			dim_vec.push_back(rep);
+		}
+		dim_cnt = dim_cnt+1;
+		reps.push_back(dim_vec);
+	}
+	ret["reps"] = reps;
+	ret["edges"] = inp.num_edges;
+
+	return ret;
+
+}
+
 //[[Rcpp::export]]
-Rcpp::List rip(std::vector<float> distances, int modulus, int dim_max, float threshold, int do_cocycles) {
+Rcpp::List rip_raw(std::vector<float> distances, int modulus, int dim_max, float threshold, int do_cocycles) {
 	//Setup distance matrix and figure out threshold
 	compressed_lower_distance_matrix dist = compressed_lower_distance_matrix(compressed_upper_distance_matrix(std::move(distances)));
 	float ratio = 1.0; //TODO: This seems like a dummy parameter at the moment
@@ -987,15 +1019,11 @@ Rcpp::List rip(std::vector<float> distances, int modulus, int dim_max, float thr
 	res.num_edges = num_edges;
 	
 	//Convert ripserResults to R.
-	Rcpp::List ret;
-	ret["pairs"] = res.births_and_deaths_by_dim;
-	ret["reps"]  = res.cocycles_by_dim;
-	ret["edges"] = res.num_edges;
-
-	return ret;
+	return ripserResultToR(res);
 }
 
 
+//Will this be useful to interface?
 ripserResults rips_dm_sparse(int* I, int* J, float* V, int NEdges,
 								 int N, int modulus, int dim_max, float threshold, int do_cocycles) {
 	//Setup distance matrix and figure out threshold
