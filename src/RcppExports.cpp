@@ -6,24 +6,23 @@
 using namespace Rcpp;
 
 // rip
-std::vector<double> rip(NumericMatrix D_R, int N, int modulus, int dim_max, float threshold, int do_cocycles);
-RcppExport SEXP _tdatools_rip(SEXP D_RSEXP, SEXP NSEXP, SEXP modulusSEXP, SEXP dim_maxSEXP, SEXP thresholdSEXP, SEXP do_cocyclesSEXP) {
+Rcpp::List rip(std::vector<float> distances, int modulus, int dim_max, float threshold, int do_cocycles);
+RcppExport SEXP _tdatools_rip(SEXP distancesSEXP, SEXP modulusSEXP, SEXP dim_maxSEXP, SEXP thresholdSEXP, SEXP do_cocyclesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type D_R(D_RSEXP);
-    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< std::vector<float> >::type distances(distancesSEXP);
     Rcpp::traits::input_parameter< int >::type modulus(modulusSEXP);
     Rcpp::traits::input_parameter< int >::type dim_max(dim_maxSEXP);
     Rcpp::traits::input_parameter< float >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< int >::type do_cocycles(do_cocyclesSEXP);
-    rcpp_result_gen = Rcpp::wrap(rip(D_R, N, modulus, dim_max, threshold, do_cocycles));
+    rcpp_result_gen = Rcpp::wrap(rip(distances, modulus, dim_max, threshold, do_cocycles));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_tdatools_rip", (DL_FUNC) &_tdatools_rip, 6},
+    {"_tdatools_rip", (DL_FUNC) &_tdatools_rip, 5},
     {NULL, NULL, 0}
 };
 

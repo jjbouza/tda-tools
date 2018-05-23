@@ -5,9 +5,9 @@ library('tdatools')
 
 #Synthetic data containing the following points in R^2:
 # [0,0], [1,0], [0,1]
+point_vector <- c(0,1, 1,1, 1,0, 1,-1, 0,-1, -1,-1, -1,0, -1,1)
+point_mat <- t(matrix(point_vector, nrow=2, ncol=8))
+dist_mat = as.vector(dist(point_mat))
 
-point_vector <- c(0,0, 1,0, 0,1)
-point_mat <- matrix(point_vector, nrows=3, ncols=2)
-dist_mat = dist(point_mat)
 
-print(rip(dist_mat, 9, 1, 2, 1, 0))
+rip(dist_mat, 2, 2, 10, 1)
