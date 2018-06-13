@@ -1,5 +1,4 @@
 /*
-
 Ripser: a lean C++ code for computation of Vietoris-Rips persistence barcodes
 
 Copyright 2015-2016 Ulrich Bauer.

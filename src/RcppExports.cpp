@@ -21,8 +21,11 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_pl_interface();
+
 static const R_CallMethodDef CallEntries[] = {
     {"_tdatools_rip_raw", (DL_FUNC) &_tdatools_rip_raw, 5},
+    {"_rcpp_module_boot_pl_interface", (DL_FUNC) &_rcpp_module_boot_pl_interface, 0},
     {NULL, NULL, 0}
 };
 

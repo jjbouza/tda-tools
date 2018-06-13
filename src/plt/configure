@@ -1,0 +1,38 @@
+#This is a configuration file for a Persistence Landscape Toolbox (PLT). 
+#Please do not change any line starting with a hash sign
+#
+#If in your files with persistence intervals there are infinite ones, please set the
+#variable right after this sentence to 1. Otherwise, please set it up to 0.
+#
+1
+#
+#If there are infinite persistence intervals (and the value above is set to 1), 
+#please provide here a values which should be read as plus infinity:
+#
+10000
+#
+#If there are infinite barcodes possible, they either can be ignored or not by the PLT.
+#If you do not wnat them to be ignored, please set #shallInfiniteBarcodesBeIgnored to false.
+#
+1
+#
+#If the infinite barcodes are not to be ignored and the variable shallInfiniteBarcodesBeIgnored
+#is set to false, then please provide below the value which should be used by PLT in place of infinity:
+#
+10000
+#
+#The Persistence Landscape Toolbox (PLT) can compute distances using two different
+#representations of landscapes. The first, and default one, is the representation that
+#uses pairs (critical point, critical value). Alternative representation, which may be
+#faster in some cases, is a grid-base one. In case of grid-base representation we assume
+#that the begin and end points of the intervals are sampled from a finite, uniformly
+#distributed grid. If this is the case in your computations, please set the variable
+#belowto true.
+0
+#
+#in case grid is used in a computations, you need to provide a grid diameter here.
+0.01
+#
+#A small number, used for a debugging purposes. Ignore when not in the debugging mode.
+#
+0.000005
