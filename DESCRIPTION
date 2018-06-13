@@ -8,4 +8,6 @@ Maintainer: Jose Bouza <josejbouza@gmail.com>
 Description: Write this.
 License: GPL (>= 2)
 Imports: Rcpp (>= 0.12.16)
+Depends: Rcpp
+RcppModules: landscape, diagram
 LinkingTo: Rcpp

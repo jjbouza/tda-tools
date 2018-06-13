@@ -20,13 +20,12 @@ ripser_wrapper <- function(rip.input, rip.format, rip.dim, rip.threshold = -1){
   if (rip.threshold != -1){
     rip.args <- paste(rip.args, paste("--threshold", rip.threshold))
   }
-  
+
   # Use Ripser.
   barcode <- system2(command = "./bin/ripser", 
                      args = rip.args, 
                      stdout = TRUE,
                      input = rip.input)
-  
   # Convert text output to list of matrices giving barcodes
   new.degrees.at <- which(grepl(pattern = "persistence", x = barcode))
   ph <- vector("list", length(new.degrees.at))

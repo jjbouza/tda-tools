@@ -5,27 +5,13 @@
 
 using namespace Rcpp;
 
-// rip_raw
-Rcpp::List rip_raw(std::vector<float> distances, int modulus, int dim_max, float threshold, int do_cocycles);
-RcppExport SEXP _tdatools_rip_raw(SEXP distancesSEXP, SEXP modulusSEXP, SEXP dim_maxSEXP, SEXP thresholdSEXP, SEXP do_cocyclesSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<float> >::type distances(distancesSEXP);
-    Rcpp::traits::input_parameter< int >::type modulus(modulusSEXP);
-    Rcpp::traits::input_parameter< int >::type dim_max(dim_maxSEXP);
-    Rcpp::traits::input_parameter< float >::type threshold(thresholdSEXP);
-    Rcpp::traits::input_parameter< int >::type do_cocycles(do_cocyclesSEXP);
-    rcpp_result_gen = Rcpp::wrap(rip_raw(distances, modulus, dim_max, threshold, do_cocycles));
-    return rcpp_result_gen;
-END_RCPP
-}
 
-RcppExport SEXP _rcpp_module_boot_pl_interface();
+RcppExport SEXP _rcpp_module_boot_landscape();
+RcppExport SEXP _rcpp_module_boot_diagram();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_tdatools_rip_raw", (DL_FUNC) &_tdatools_rip_raw, 5},
-    {"_rcpp_module_boot_pl_interface", (DL_FUNC) &_rcpp_module_boot_pl_interface, 0},
+    {"_rcpp_module_boot_landscape", (DL_FUNC) &_rcpp_module_boot_landscape, 0},
+    {"_rcpp_module_boot_diagram", (DL_FUNC) &_rcpp_module_boot_diagram, 0},
     {NULL, NULL, 0}
 };
 
