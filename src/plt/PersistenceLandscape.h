@@ -2988,7 +2988,7 @@ double computeInnerProduct( const PersistenceLandscape& l1 , const PersistenceLa
 
 double computeInnerProduct( const PersistenceLandscape& l1 , const PersistenceLandscape& l2 )
 {
-    bool dbg = true;
+    bool dbg = false;
     double result = 0;
 
     for ( size_t level = 0 ; level != std::min( l1.size() , l2.size() ) ; ++level )
