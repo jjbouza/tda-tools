@@ -68,6 +68,19 @@ std::vector<std::vector<std::pair<double, double>>> scaleDiscreteLandscapes(doub
 }
 
 
+std::vector<std::vector<std::pair<double,double>>> exactLandscapeToDiscrete(PersistenceLandscape l, double dx, double max_x){
+	std::vector<std::vector<std::pair<double,double>>> out;
+	for(std::vector<std::pair<double,double>> level : l.land){
+		std::pair<double,double> previous_point = std::make_pair(0,0);
+		for(int i = 0; i < level.size(); i++){
+			double delta_x = level[i].first - previous_point.first;
+			double delta_y = level[i].second - previous_point.second;
+			double slope = delta_y/delta_x;
+			
+		}
+	}
+}
+
 double innerProductDiscreteLandscapes(PersistenceLandscape l1, PersistenceLandscape l2, double dx){
 	int min_level = std::min(l1.land.size(), l2.land.size());
 	double integral_buffer = 0;
@@ -89,13 +102,7 @@ public:
 	PersistenceLandscapeInterface(NumericMatrix persistence_diagram, bool exact=false, double max_pl=10, double dx=0.01) : exact(exact), max_pl(max_pl), dx(dx){
 		//Initalize a PersistenceLandscape object.
 		auto pd = PersistenceBarcodes(rDataProcess(persistence_diagram, max_pl));
-		PersistenceLandscapeInterface::pl_raw = PersistenceLandscape();
-
-		if(exact)
-			PersistenceLandscapeInterface::pl_raw = PersistenceLandscape(pd, exact);
-		else
-			PersistenceLandscapeInterface::pl_raw.computeLandscapeOnDiscreteSetOfPoints(pd, dx);
-
+		PersistenceLandscapeInterface::pl_raw = PersistenceLandscape(pd, exact, dx);
 	}
 
 	PersistenceLandscapeInterface(PersistenceLandscape pl, bool exact, double max_pl, double dx) : pl_raw(pl), exact(exact), max_pl(max_pl), dx(dx){}

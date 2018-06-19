@@ -175,7 +175,7 @@ public:
     bool testLandscape( const PersistenceBarcodes& b );//for tests only!
 
     PersistenceLandscape(){this->dimension = 0;}
-    PersistenceLandscape( const PersistenceBarcodes& p, bool exact=true );
+    PersistenceLandscape( const PersistenceBarcodes& p, bool exact=true, double dx=0.01);
     PersistenceLandscape operator=( const PersistenceLandscape& org );
     PersistenceLandscape(const PersistenceLandscape&);
     PersistenceLandscape(char* filename);
@@ -1312,11 +1312,11 @@ bool check( unsigned i , std::vector< std::pair<double,double> > v )
 
 
 
-PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool exact)
+PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool exact, double grid_diameter )
 {
     bool dbg = false;
     if ( dbg ){cerr << "PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p )" << endl;}
-    if ( PersistenceLandscape::exact )
+    if ( exact )
     {
         if ( dbg ){cerr << "PL version" << endl;getchar();}
         //this is a general algorithm to construct persistence landscapes.
@@ -1353,7 +1353,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
             }
 
             std::vector< std::pair<double,double> > lambda_n;
-            lambda_n.push_back( std::make_pair( INT_MIN , 0 ) );
+		//lambda_n.push_back( std::make_pair( INT_MIN , 0 ) );
             lambda_n.push_back( std::make_pair(birth(characteristicPoints[0]),0) );
             lambda_n.push_back( characteristicPoints[0] );
 
@@ -1484,7 +1484,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
     {
         if ( dbg ){cerr << "Constructing persistence landscape based on a grid \n";getchar();}
         //in this case useGridInComputations is true, therefore we will build a landscape on a grid.
-        extern double gridDiameter;
+        double gridDiameter = grid_diameter;
         this->dimension = p.dimensionOfBarcode;
         std::pair<double,double> minMax = p.minMax();
         size_t numberOfBins = 2*((minMax.second - minMax.first)/gridDiameter)+1;
@@ -1496,7 +1496,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         //Now, the idea is to iterate on this->land[lambda-1] and use only points over there. The problem is at the very beginning, when there is nothing
         //in this->land. That is why over here, we make a fate this->land[0]. It will be later deteted before moving on.
         std::vector< std::pair<double,double> > aa;
-        aa.push_back( std::make_pair( INT_MIN , 0 ) );
+        //aa.push_back( std::make_pair( INT_MIN , 0 ) );
         double x = minMax.first;
         for ( size_t i = 0 ; i != numberOfBins ; ++i )
         {
@@ -1507,7 +1507,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
             if ( dbg ){cerr << "x : " << x << endl;}
             x += 0.5*gridDiameter;
         }
-        aa.push_back( std::make_pair( INT_MAX , 0 ) );
+        //aa.push_back( std::make_pair( INT_MAX , 0 ) );
 
         if ( dbg ){cerr << "Grid has been created. Now, begin to add intervals \n";}
 
@@ -1554,7 +1554,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         {
             if ( dbg ){cerr << "Constructing lambda_" << lambda << endl;}
             std::vector< std::pair<double,double> >  nextLambbda;
-            nextLambbda.push_back( std::make_pair(INT_MIN,0) );
+            //nextLambbda.push_back( std::make_pair(INT_MIN,0) );
             //for every element in the domain for which the previous landscape is nonzero.
             bool wasPrevoiusStepZero = true;
             size_t nr = 1;
@@ -1596,7 +1596,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
                 //removing the first, fake, landscape
                 this->land.clear();
             }
-            nextLambbda.push_back( std::make_pair(INT_MAX,0) );
+            //nextLambbda.push_back( std::make_pair(INT_MAX,0) );
             nextLambbda.erase( unique( nextLambbda.begin(), nextLambbda.end() ), nextLambbda.end() );
             this->land.push_back( nextLambbda );
         }

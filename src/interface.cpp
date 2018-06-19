@@ -5,10 +5,10 @@
 
 using namespace Rcpp;
 RCPP_EXPOSED_CLASS(PersistenceLandscapeInterface)
-RCPP_MODULE(landscape) {
+RCPP_MODULE(Landscape) {
 
-    class_<PersistenceLandscapeInterface>("landscape")
-    .constructor<NumericMatrix,bool>()
+    class_<PersistenceLandscapeInterface>("PersistenceLandscape")
+    .constructor<NumericMatrix,bool,double,double>()
 
     .method("getExact", &PersistenceLandscapeInterface::getPersistenceLandscapeExact, "Returns the PL in the exact representation.")
     .method("getDiscrete", &PersistenceLandscapeInterface::getPersistenceLandscapeDiscrete, "Returns the PL in the discrete representation.")
@@ -23,6 +23,6 @@ RCPP_MODULE(landscape) {
 
 }
 
-RCPP_MODULE(diagram) {
+RCPP_MODULE(Diagram) {
 	Rcpp::function("rip_raw", &rip_raw);
 }

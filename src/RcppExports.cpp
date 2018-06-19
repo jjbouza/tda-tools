@@ -6,12 +6,12 @@
 using namespace Rcpp;
 
 
-RcppExport SEXP _rcpp_module_boot_landscape();
-RcppExport SEXP _rcpp_module_boot_diagram();
+RcppExport SEXP _rcpp_module_boot_Landscape();
+RcppExport SEXP _rcpp_module_boot_Diagram();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rcpp_module_boot_landscape", (DL_FUNC) &_rcpp_module_boot_landscape, 0},
-    {"_rcpp_module_boot_diagram", (DL_FUNC) &_rcpp_module_boot_diagram, 0},
+    {"_rcpp_module_boot_Landscape", (DL_FUNC) &_rcpp_module_boot_Landscape, 0},
+    {"_rcpp_module_boot_Diagram", (DL_FUNC) &_rcpp_module_boot_Diagram, 0},
     {NULL, NULL, 0}
 };
 

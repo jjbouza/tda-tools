@@ -10,13 +10,13 @@ point_mat_1 <- t(matrix(point_vector_1, nrow=2, ncol=2))
 point_mat_2 <- t(matrix(point_vector_2, nrow=2, ncol=2))
 
 #Persistence Diagrams of points
-pd1 <- rip_pc(point_mat_1, 2, 2, 10, 0)
-pd2 <- rip_pc(point_mat_2, 2, 2, 10, 0)
+pd1 <- diagram_pc(point_mat_1, 2, 2, 10, 0)
+pd2 <- diagram_pc(point_mat_2, 2, 2, 10, 0)
 
 #Landscapes of first degree persistence (connected components), computed exactly.
-pl1 <- new(landscape, pd1$pairs[[1]], TRUE)
-pl2 <- new(landscape, pd2$pairs[[1]], TRUE)
+pl1 <-  landscape(pd1$pairs[[1]], FALSE)
 
+print(pl1$getDiscrete())
 
 ####################Examples of operations:#################################
 
