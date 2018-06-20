@@ -1508,6 +1508,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
             x += 0.5*gridDiameter;
         }
         //aa.push_back( std::make_pair( INT_MAX , 0 ) );
+	//
 
         if ( dbg ){cerr << "Grid has been created. Now, begin to add intervals \n";}
 
@@ -1516,7 +1517,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         {
             size_t beginn = (size_t)(2*( p.barcodes[intervalNo].first-minMax.first )/( gridDiameter ))+1;
             if ( dbg ){cerr << "We are considering interval : [" << p.barcodes[intervalNo].first << "," << p.barcodes[intervalNo].second << "]. It will begin in  : " << beginn << " in the grid \n";}
-            while ( criticalValuesOnPointsOfGrid[beginn].first < p.barcodes[intervalNo].second )
+            while ( grid_diameter+criticalValuesOnPointsOfGrid[beginn].first < p.barcodes[intervalNo].second )
             {
                 if ( dbg )
                 {
@@ -1554,7 +1555,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         {
             if ( dbg ){cerr << "Constructing lambda_" << lambda << endl;}
             std::vector< std::pair<double,double> >  nextLambbda;
-            //nextLambbda.push_back( std::make_pair(INT_MIN,0) );
+            nextLambbda.push_back( std::make_pair(0,0) );
             //for every element in the domain for which the previous landscape is nonzero.
             bool wasPrevoiusStepZero = true;
             size_t nr = 1;

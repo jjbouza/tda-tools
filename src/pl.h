@@ -136,6 +136,7 @@ public:
 	}
 	
 	std::vector<std::vector<std::vector<double>>> getPersistenceLandscapeDiscrete(){
+		std::cerr << exact << std::endl;
 		if(exact){
 			return persistenceDataProcess(exactLandscapeToDiscrete(pl_raw.land, dx, max_pl));
 		}
