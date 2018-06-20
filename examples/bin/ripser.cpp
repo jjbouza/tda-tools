@@ -491,6 +491,8 @@ void assemble_columns_to_reduce(std::vector<diameter_index_t>& columns_to_reduce
                                 index_t n, value_t threshold, const binomial_coeff_table& binomial_coeff) {
 	index_t num_simplices = binomial_coeff(n, dim + 2);
 
+	std::cerr<<n<<std::endl;
+
 	columns_to_reduce.clear();
 
 #ifdef INDICATE_PROGRESS
@@ -882,6 +884,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
+
 	std::ifstream file_stream(filename);
 	if (filename && file_stream.fail()) {
 		std::cerr << "couldn't open file " << filename << std::endl;
@@ -951,7 +954,10 @@ int main(int argc, char** argv) {
 		              comp, comp_prev, binomial_coeff);
 
 		if (dim < dim_max) {
+			//Here
 			assemble_columns_to_reduce(columns_to_reduce, pivot_column_index, comp, dim, n, threshold, binomial_coeff);
 		}
+
+
 	}
 }

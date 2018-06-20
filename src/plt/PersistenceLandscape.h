@@ -416,9 +416,9 @@ PersistenceLandscape::PersistenceLandscape(std::vector< std::vector<std::pair<do
     for ( size_t level = 0 ; level != landscapePointsWithoutInfinities.size() ; ++level )
     {
         std::vector< std::pair<double,double> > v;
-        v.push_back(std::make_pair(INT_MIN,0));
+        //v.push_back(std::make_pair(INT_MIN,0));
         v.insert( v.end(), landscapePointsWithoutInfinities[level].begin(), landscapePointsWithoutInfinities[level].end() );
-        v.push_back(std::make_pair(INT_MAX,0));
+        //v.push_back(std::make_pair(INT_MAX,0));
         this->land.push_back( v );
     }
     this->dimension = 0;

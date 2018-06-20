@@ -16,7 +16,9 @@ pd2 <- diagram_pc(point_mat_2, 2, 2, 10, 0)
 #Landscapes of first degree persistence (connected components), computed exactly.
 pl1 <-  landscape(pd1$pairs[[1]], FALSE)
 
+
 print(pl1$getDiscrete())
+quit()
 
 ####################Examples of operations:#################################
 

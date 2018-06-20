@@ -1,3 +1,4 @@
+library('methods')
 # Alexander Wagner, April 2018
   
 ripser_wrapper <- function(rip.input, rip.format, rip.dim, rip.threshold = -1){
@@ -26,6 +27,7 @@ ripser_wrapper <- function(rip.input, rip.format, rip.dim, rip.threshold = -1){
                      args = rip.args, 
                      stdout = TRUE,
                      input = rip.input)
+
   # Convert text output to list of matrices giving barcodes
   new.degrees.at <- which(grepl(pattern = "persistence", x = barcode))
   ph <- vector("list", length(new.degrees.at))

@@ -67,18 +67,37 @@ std::vector<std::vector<std::pair<double, double>>> scaleDiscreteLandscapes(doub
 	return out;
 }
 
-
 std::vector<std::vector<std::pair<double,double>>> exactLandscapeToDiscrete(PersistenceLandscape l, double dx, double max_x){
 	std::vector<std::vector<std::pair<double,double>>> out;
 	for(std::vector<std::pair<double,double>> level : l.land){
+		std::vector<std::pair<double,double>> level_out;
+
 		std::pair<double,double> previous_point = std::make_pair(0,0);
+		double x_buffer = previous_point.first;
+		double y_buffer = previous_point.second;
+
 		for(int i = 0; i < level.size(); i++){
-			double delta_x = level[i].first - previous_point.first;
-			double delta_y = level[i].second - previous_point.second;
-			double slope = delta_y/delta_x;
-			
+			std::pair<double, double> point = level[i];
+			//Make sure slope is well defined:
+			if(point.first != previous_point.first){
+				double delta_x = level[i].first - previous_point.first;
+				double delta_y = level[i].second - previous_point.second;
+				double slope = delta_y/delta_x;
+
+				while(x_buffer < point.first && x_buffer < max_x){
+					y_buffer += dx*slope;
+					x_buffer += dx;
+					level_out.push_back(std::make_pair(x_buffer, y_buffer));
+				}
+			}
+
+			previous_point = point;
 		}
+
+		out.push_back(level_out);
 	}
+
+	return out;
 }
 
 double innerProductDiscreteLandscapes(PersistenceLandscape l1, PersistenceLandscape l2, double dx){
@@ -93,8 +112,6 @@ double innerProductDiscreteLandscapes(PersistenceLandscape l1, PersistenceLandsc
 	return integral_buffer;
 }
 
-//Note: We can only allow getPersistenceLandscapeExact if the data is already represented exactly.
-//To add: Average
 class PersistenceLandscapeInterface{
 public:
 	//Creates PL from PD
@@ -117,18 +134,16 @@ public:
 			return persistenceDataProcess(pl_raw.land);
 		}
 	}
-
-	//NOTE: This will permentantly change the representation of this to discrete.
+	
 	std::vector<std::vector<std::vector<double>>> getPersistenceLandscapeDiscrete(){
 		if(exact){
- 			//pl_raw.computeLandscapeOnDiscreteSetOfPoints(0.000001);
-			//return persistenceDataProcess(pl_raw.land);
+			return persistenceDataProcess(exactLandscapeToDiscrete(pl_raw.land, dx, max_pl));
 		}
 		else{
 			return persistenceDataProcess(pl_raw.land);
 		}
 	}
-	
+
 	//Adds this to another PL
 	//We need to implement the appropriate functions for doing this with discrete representations.
 	PersistenceLandscapeInterface sum(const PersistenceLandscapeInterface& other){
@@ -142,16 +157,6 @@ public:
 		return PersistenceLandscapeInterface(pl_out, exact, max_pl, dx);
 	}
 
-	PersistenceLandscapeInterface scale(double scale){
-		PersistenceLandscape pl_out;
-		if (exact)
-			pl_out = scale*pl_raw;
-
-		else
-			pl_out = PersistenceLandscape(scaleDiscreteLandscapes(scale, pl_raw));
-
-		return PersistenceLandscapeInterface(pl_out, exact, max_pl, dx);
-	}
 
 	double inner(PersistenceLandscapeInterface& other){
 		double scaler_out;
@@ -163,6 +168,18 @@ public:
 		
 		return scaler_out;
 	}
+
+	PersistenceLandscapeInterface scale(double scale){
+		PersistenceLandscape pl_out;
+		if (exact)
+			pl_out = scale*pl_raw;
+
+		else
+			pl_out = PersistenceLandscape(scaleDiscreteLandscapes(scale, pl_raw));
+
+		return PersistenceLandscapeInterface(pl_out, exact, max_pl, dx);
+	}
+
 
 
 private:
