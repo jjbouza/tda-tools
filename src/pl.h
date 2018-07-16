@@ -4,9 +4,28 @@
 
 using namespace Rcpp;
 
+
+std::vector<NumericMatrix> persistenceLandscapeToR(std::vector<std::vector<std::vector<double>>> input){
+	std::vector<NumericMatrix> out; 
+	for(auto level : input){
+		NumericMatrix level_out(level.size(),2);
+		for(int i = 0; i < level.size(); i++){
+			level_out(i,0) = level[i][0];
+			level_out(i,1) = level[i][1];
+
+			if(level[i][0] == INT_MAX)
+				level_out(i,0) = R_PosInf;
+
+		}
+		out.push_back(level_out);
+	}
+
+	return out;
+}
+
 //need to figure out a better way of doing what the next two functions are doing.
 //Neccesary since Rcpp can not handle std::pair.
-std::vector<std::vector<std::vector<double>>> persistenceDataProcess(std::vector<std::vector<std::pair<double, double>>> pl){
+std::vector<NumericMatrix> persistenceDataProcess(std::vector<std::vector<std::pair<double, double>>> pl){
 	std::vector<std::vector<std::vector<double>>> out;
 	for(auto order : pl){
 		std::vector<std::vector<double>> order_vec;
@@ -17,7 +36,7 @@ std::vector<std::vector<std::vector<double>>> persistenceDataProcess(std::vector
 		out.push_back(order_vec);
 	}
 
-	return out;
+	return persistenceLandscapeToR(out);
 }
 
 std::vector<std::pair<double, double>> rDataProcess(NumericMatrix pd, double max){
@@ -112,6 +131,7 @@ double innerProductDiscreteLandscapes(PersistenceLandscape l1, PersistenceLandsc
 	return integral_buffer;
 }
 
+
 class PersistenceLandscapeInterface{
 public:
 	//Creates PL from PD
@@ -125,7 +145,7 @@ public:
 	PersistenceLandscapeInterface(PersistenceLandscape pl, bool exact, double max_pl, double dx) : pl_raw(pl), exact(exact), max_pl(max_pl), dx(dx){}
 
 
-	std::vector<std::vector<std::vector<double>>> getPersistenceLandscapeExact(){
+	std::vector<NumericMatrix> getPersistenceLandscapeExact(){
 		if (!exact){
 			std::cout << "Error: Can not convert a discrete PL to an exact PL.";
 		}
@@ -135,14 +155,17 @@ public:
 		}
 	}
 	
-	std::vector<std::vector<std::vector<double>>> getPersistenceLandscapeDiscrete(){
-		std::cerr << exact << std::endl;
+	std::vector<NumericMatrix> getPersistenceLandscapeDiscrete(){
 		if(exact){
 			return persistenceDataProcess(exactLandscapeToDiscrete(pl_raw.land, dx, max_pl));
 		}
 		else{
 			return persistenceDataProcess(pl_raw.land);
 		}
+	}
+
+	std::vector<NumericMatrix> getInternal(){
+		return persistenceDataProcess(pl_raw.land);
 	}
 
 	//Adds this to another PL
@@ -153,8 +176,7 @@ public:
 			pl_out = pl_raw+other.pl_raw;
 		else
 			pl_out = PersistenceLandscape(addDiscreteLandscapes(pl_raw, other.pl_raw));
-
-
+		
 		return PersistenceLandscapeInterface(pl_out, exact, max_pl, dx);
 	}
 
@@ -181,7 +203,7 @@ public:
 		return PersistenceLandscapeInterface(pl_out, exact, max_pl, dx);
 	}
 
-
+	
 
 private:
 	bool exact;

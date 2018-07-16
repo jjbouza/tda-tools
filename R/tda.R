@@ -6,6 +6,39 @@ loadModule("Diagram", TRUE)
 
 #Landscape R helper functions:
 
+#' Plot a persistenceLandscape object.
+#' @param PersistenceLandscape A PL object.
+#' @param  infinity_sub When using an exact representation, a value of Inf can appear in the PL. infinity_sub replaces
+#' this with a different value in the plot. If infinity_sub=-1 then the Inf point will be excluded. If infinity_sub is
+#' any other number then the Inf point will be replaced by that number.
+PLplot <- function(PersistenceLandscape, infinity_sub=-1){
+	
+	#Needed to process Inf values:
+	level_process <- function(level, infinity_sub){
+		level <- t(level)
+		if(infinity_sub == -1){
+			level <- level[,(1:dim(level)[2]-1)]
+		}
+
+		else{
+			level[level == Inf] <- infinity_sub
+		}
+
+
+		return(level)
+	}
+	
+	internal <- PersistenceLandscape$getInternal()
+	level1 <- level_process(internal[[1]], infinity_sub)
+	plot(level1[1,],level1[2,], type='l', xlab='x', ylab='')
+
+	for(level in internal){
+		level <- level_process(level, infinity_sub)
+		lines(level[1,], level[2,])
+	}
+}
+
+
 #' Compute landscape of a persistence diagram.
 #'
 #' @param PersistenceDiagram A list of persistence pairs.
@@ -15,7 +48,7 @@ loadModule("Diagram", TRUE)
 #' @return A PersistenceLandscape object.
 landscape <- function(PersistenceDiagram, exact=FALSE, max_x=10, dx=0.1){
 	#Construct a persistence landscape
-	new(PersistenceLandscape, PersistenceDiagram, exact, max_x, dx)
+	landscape_raw <- new(PersistenceLandscape, PersistenceDiagram, exact, max_x, dx)
 }
 
 #This can be done in C++ as well but the performance gains are essentially zero.
@@ -32,7 +65,8 @@ average <- function(PersistenceLanscapeList){
 		i  = i + 1
 	}
 
-	return(mean$scale(1.0/length(PersistenceLanscapeList)))
+	#return(mean$scale(1.0/length(PersistenceLanscapeList)))
+	return(mean)
 }
 
 

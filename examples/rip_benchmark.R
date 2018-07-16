@@ -5,7 +5,8 @@ source('torus_sample.R')
 point_mat <- TorusUnif(5000,1,5)
 
 start_time1 <- Sys.time()
-pd <- diagram_pc(point_mat, 2, 2, 1, 0)
+pd <- diagram_pc(point_mat, 2, 2, 1, 1)
+print(pd)
 end_time1 <- Sys.time()
 
 source("ripser_wrapper.R")

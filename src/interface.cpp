@@ -12,6 +12,7 @@ RCPP_MODULE(Landscape) {
 
     .method("getExact", &PersistenceLandscapeInterface::getPersistenceLandscapeExact, "Returns the PL in the exact representation.")
     .method("getDiscrete", &PersistenceLandscapeInterface::getPersistenceLandscapeDiscrete, "Returns the PL in the discrete representation.")
+    .method("getInternal", &PersistenceLandscapeInterface::getInternal, "Returns the internal tensor representation of the PL.")
     .method("add", &PersistenceLandscapeInterface::sum, "Adds this PL to another.")
     .method("scale", &PersistenceLandscapeInterface::scale, "Scales this PL by a scaler.")
     .method("inner", &PersistenceLandscapeInterface::inner, "Take inner product of this PL with another.")

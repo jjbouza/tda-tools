@@ -1,3 +1,10 @@
+//    AOAOAOA
+//    AOA
+//    AOA
+//    AOA
+//    AOA
+//    AOA
+//    A
 //    Copyright 2013-2014 University of Pennsylvania
 //    Created by Pawel Dlotko
 //
@@ -163,8 +170,11 @@ double functionValue ( std::pair<double,double> p1, std::pair<double,double> p2 
     //we assume here, that x \in [ p1.first, p2.first ] and p1 and p2 are points between which we will put the line segment
     double a = (p2.second - p1.second)/(p2.first - p1.first);
     double b = p1.second - a*p1.first;
-    //cerr << "Line crossing points : (" << p1.first << "," << p1.second << ") oraz (" << p2.first << "," << p2.second << ") : \n";
-    //cerr << "a : " << a << " , b : " << b << " , x : " << x << endl;
+   
+    if(a*x+b < 0){
+	    std::cout << "Pair 1: " << p1 << "  , Pair 2: " << p2 << " x: " << x << std::endl;
+    }
+
     return (a*x+b);
 }
 
@@ -2339,73 +2349,82 @@ PersistenceLandscape PersistenceLandscape::multiplyLanscapeByRealNumberNotOverwr
 bool operationOnPairOfLandscapesDBG = false;
 PersistenceLandscape operationOnPairOfLandscapes ( const PersistenceLandscape& land1 ,  const PersistenceLandscape& land2 , double (*oper)(double,double) )
 {
-    if ( operationOnPairOfLandscapesDBG ){std::cout << "operationOnPairOfLandscapes\n";std::cin.ignore();}
     PersistenceLandscape result;
     std::vector< std::vector< std::pair<double,double> > > land( std::max( land1.land.size() , land2.land.size() ) );
     result.land = land;
 
     for ( size_t i = 0 ; i != std::min( land1.land.size() , land2.land.size() ) ; ++i )
     {
+	//Most of the following was rewritten by Jose Bouza, since the orginal code contained a subtle bug.
         std::vector< std::pair<double,double> > lambda_n;
+	std::vector<std::pair<double,double>> p_list = land1.land[i];
+	std::vector<std::pair<double,double>> q_list = land2.land[i];
+
         int p = 0;
         int q = 0;
-        while ( (p+1 < land1.land[i].size()) && (q+1 < land2.land[i].size()) )
-        {
-            if ( operationOnPairOfLandscapesDBG )
-            {
-                std::cerr << "p : " << p << "\n";
-                std::cerr << "q : " << q << "\n";
-                std::cout << "land1.land[i][p].first : " << land1.land[i][p].first << "\n";
-                std::cout << "land2.land[i][q].first : " << land2.land[i][q].first << "\n";
-            }
 
-            if ( land1.land[i][p].first < land2.land[i][q].first )
-            {
-                if ( operationOnPairOfLandscapesDBG )
-                {
-                    std::cout << "first \n";
-                    std::cout << " functionValue(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) : "<<  functionValue(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) << "\n";
-                    std::cout << "oper( " << land1.land[i][p].second <<"," << functionValue(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) << " : " << oper( land1.land[i][p].second , functionValue(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) ) << "\n";
-                }
-                lambda_n.push_back( std::make_pair( land1.land[i][p].first , oper( land1.land[i][p].second , functionValue(land2.land[i][q-1],land2.land[i][q],land1.land[i][p].first) ) ) );
-                ++p;
-                continue;
-            }
-            if ( land1.land[i][p].first > land2.land[i][q].first )
-            {
-                if ( operationOnPairOfLandscapesDBG )
-                {
-                    std::cout << "Second \n";
-                    std::cout << "functionValue("<< land1.land[i][p-1]<<" ,"<< land1.land[i][p]<<", " << land2.land[i][q].first<<" ) : " << functionValue( land1.land[i][p-1] , land1.land[i][p-1] ,land2.land[i][q].first ) << "\n";
-                    std::cout << "oper( " << functionValue( land1.land[i][p] , land1.land[i][p-1] ,land2.land[i][q].first ) <<"," << land2.land[i][q].second <<" : " << oper( land2.land[i][q].second , functionValue( land1.land[i][p] , land1.land[i][p-1] ,land2.land[i][q].first ) ) << "\n";
-                }
-                lambda_n.push_back( std::make_pair( land2.land[i][q].first , oper( functionValue( land1.land[i][p] , land1.land[i][p-1] ,land2.land[i][q].first ) , land2.land[i][q].second )  )  );
-                ++q;
-                continue;
-            }
-            if ( land1.land[i][p].first == land2.land[i][q].first )
-            {
-                if (operationOnPairOfLandscapesDBG)std::cout << "Third \n";
-                lambda_n.push_back( std::make_pair( land2.land[i][q].first , oper( land1.land[i][p].second , land2.land[i][q].second ) ) );
-                ++p;++q;
-            }
-            if (operationOnPairOfLandscapesDBG){std::cout << "Next iteration \n";getchar();}
+	int last_p=0;
+	int last_q=0;
+
+	std::vector<std::pair<double,double>> p_buffer;
+	std::vector<std::pair<double,double>> q_buffer;
+	
+	
+        while ( (p < p_list.size()) && (q < q_list.size()) ){
+		int n = p+q;
+
+		if(p_list[p].first < q_list[q].first){
+			if(n - last_p > 1){
+				//interpolate all points in q_buffer, which should be between last_p and p.
+				int last_p_t = last_p-(q-q_buffer.size());
+				for(std::pair<double,double> point : q_buffer){
+					lambda_n.push_back(std::make_pair(point.first, functionValue(p_list[last_p_t], p_list[p], point.first)));
+				}
+
+				q_buffer.clear();
+			}
+
+			p_buffer.push_back(p_list[p]);
+			last_p = n;
+			p++;
+		}
+
+		else if(q_list[q].first < p_list[p].first){
+
+			if (n - last_q > 1){
+				//interpolate all points in p_buffer, which should be between last_q and q.
+				int last_q_t = last_q-(p-p_buffer.size());
+				for(std::pair<double,double> point : p_buffer){
+					lambda_n.push_back(std::make_pair(point.first, functionValue(q_list[last_q_t], q_list[q], point.first)));
+				}
+
+				p_buffer.clear();
+
+			}
+
+			q_buffer.push_back(q_list[q]);
+			last_q = n;
+			q++;
+		}
+		
+		else{
+			lambda_n.push_back(std::make_pair(p_list[p].first, p_list[p].second+q_list[q].second));
+			q_buffer.clear();
+			p_buffer.clear();
+			last_p = n;
+			last_q = n;
+			p++;
+			q++;
+		}
+		
         }
         while ( (p+1 < land1.land[i].size())&&(q+1 >= land2.land[i].size()) )
         {
-            if (operationOnPairOfLandscapesDBG)
-            {
-                std::cout << "New point : " << land1.land[i][p].first << "  oper(land1.land[i][p].second,0) : " <<  oper(land1.land[i][p].second,0) << std::endl;
-            }
             lambda_n.push_back( std::make_pair(land1.land[i][p].first , oper(land1.land[i][p].second,0) ) );
             ++p;
         }
         while ( (p+1 >= land1.land[i].size())&&(q+1 < land2.land[i].size()) )
         {
-            if (operationOnPairOfLandscapesDBG)
-            {
-                std::cout << "New point : " << land2.land[i][q].first << " oper(0,land2.land[i][q].second) : " <<  oper(0,land2.land[i][q].second) << std::endl;
-            }
             lambda_n.push_back( std::make_pair(land2.land[i][q].first , oper(0,land2.land[i][q].second) ) );
             ++q;
         }
@@ -2416,7 +2435,6 @@ PersistenceLandscape operationOnPairOfLandscapes ( const PersistenceLandscape& l
     }
     if ( land1.land.size() > std::min( land1.land.size() , land2.land.size() ) )
     {
-        if (operationOnPairOfLandscapesDBG){std::cout << "land1.land.size() > std::min( land1.land.size() , land2.land.size() )" << std::endl;}
         for ( size_t i = std::min( land1.land.size() , land2.land.size() ) ; i != std::max( land1.land.size() , land2.land.size() ) ; ++i )
         {
             std::vector< std::pair<double,double> > lambda_n( land1.land[i] );
@@ -2431,7 +2449,6 @@ PersistenceLandscape operationOnPairOfLandscapes ( const PersistenceLandscape& l
     }
     if ( land2.land.size() > std::min( land1.land.size() , land2.land.size() ) )
     {
-        if (operationOnPairOfLandscapesDBG){std::cout << "( land2.land.size() > std::min( land1.land.size() , land2.land.size() ) ) " << std::endl;}
         for ( size_t i = std::min( land1.land.size() , land2.land.size() ) ; i != std::max( land1.land.size() , land2.land.size() ) ; ++i )
         {
             std::vector< std::pair<double,double> > lambda_n( land2.land[i] );
@@ -2444,7 +2461,6 @@ PersistenceLandscape operationOnPairOfLandscapes ( const PersistenceLandscape& l
             result.land[i].swap(lambda_n);
         }
     }
-    if ( operationOnPairOfLandscapesDBG ){std::cout << "operationOnPairOfLandscapes\n";std::cin.ignore();}
     return result;
 }//operationOnPairOfLandscapes
 
