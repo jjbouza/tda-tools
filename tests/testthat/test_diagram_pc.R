@@ -43,6 +43,17 @@ test_that("H_0 of two points with threshold=Inf",{
 
 })
 
+#Test 4: H_0 of two points with threshold=-1
+test_that("H_0 of two points with threshold=0.5",{
+	p1 = c(0,0)
+	p2 = c(3,0)
+	pd = diagram_pc(cbind(p1,p2), dim_max=0, threshold=0.5)
+	H_0 = pd$pairs[[1]]
+	expected = cbind(c(0,0), c(3,Inf))
+	expect_equal(H_0, expected)
+
+})
+
 #Helper function:
 CircleUnif <- function(n,rad=1,centre=c(0,0)){ 
 	x0 <- centre[1] ; y0 <- centre[2] 
