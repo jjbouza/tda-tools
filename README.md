@@ -31,6 +31,33 @@ CircleUnif <- function(n,rad=1,centre=c(0,0)){
 This function generated an N by 2 matrix corresponding to the point cloud sampled from the circle. Now the persistence diagram calculation is simple:
 
 ```R
-pd = diagram(X, 'point-cloud', dim_max=1)
+pd = diagram(X, 'point-cloud', dim_max=1, threshold=0.5)
 ```
-Since we are satisfied with the other default parameters, we only change the ```dim_max``` parameter, which tells Ripser the top dimension to compute homology in. Lets look closer at the returned ```pd``` object.
+Since we are satisfied with the other default parameters, we only change the ```dim_max``` parameter, which tells Ripser
+the top dimension to compute homology in. 
+
+The ```pd``` object is a class with three members, which can be accessed by
+```R pd$member```. The first class member is ```R pd$pairs```, which contains the persistence pairs calculated from X,
+indexed in a list by homology degree. So, for example, to view the degree 0 homology of X we can call
+
+```R
+print(pd$pairs[[1]])
+```
+
+You should see that all persitence pairs in degree 0 are born at 0 and die shortly after, which is what we expect.
+Note that R indexing causes 0 degree homology to be stored at index 1. In general n degree homology is stored in index n+1.
+Now lets look at homology in degree 1, which is what we were originally interested in.
+
+```R
+print(pd$pairs[[2]])
+```
+
+Now you should see a persistence pair born early and never dying. For example, I get
+
+```R
+          [,1] [,2]
+[1,] 0.3216245  Inf
+```
+
+Meaning that a degree 1 persistence cycle was born at 0.3216 and did not die before the threshold value.
+
