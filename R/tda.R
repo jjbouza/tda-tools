@@ -86,7 +86,7 @@ average <- function(PersistenceLanscapeList){
 #' @param threshold Maximum distance to generate edge in simplicial complex.
 #' @param do_cocycles Set to 1 to generate cocycles, 0 otherwise.
 #' @return The persistence data, including persistence pairs.
-diagram <- function(input, type, dim_max=3, threshold=1000, modulus=2, do_cocycles=0){
+diagram <- function(input, type, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0){
 	out <- NULL
 	if(type == 'point-cloud'){
 		out <- diagram_pc(input, modulus, dim_max, threshold, do_cocycles)
@@ -99,11 +99,11 @@ diagram <- function(input, type, dim_max=3, threshold=1000, modulus=2, do_cocycl
 	return (out)
 }
 
-diagram_dm <- function(distances, dim_max=3, threshold=1000, modulus=2, do_cocycles=0) {
+diagram_dm <- function(distances, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0) {
 	rip_raw(as.vector(distances), modulus, dim_max, threshold, do_cocycles)
 }
 
-diagram_pc <- function(points, dim_max=3, threshold=1000, modulus=2, do_cocycles=0){
+diagram_pc <- function(points, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0){
 	distances <- as.vector(dist(points))
     	rip_raw(as.vector(distances), modulus, dim_max, threshold, do_cocycles)
 }
