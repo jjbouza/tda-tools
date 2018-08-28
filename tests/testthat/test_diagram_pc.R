@@ -46,10 +46,10 @@ test_that("H_0 of two points with threshold=Inf",{
 #Test 4: H_0 of two points with threshold=-1
 test_that("H_0 of two points with threshold=0.5",{
 	p1 = c(0,0)
-	p2 = c(3,0)
+	p2 = c(0.2,0)
 	pd = diagram_pc(cbind(p1,p2), dim_max=0, threshold=0.5)
 	H_0 = pd$pairs[[1]]
-	expected = cbind(c(0,0), c(3,Inf))
+	expected = cbind(c(0,0), c(0.2,Inf))
 	expect_equal(H_0, expected)
 
 })
@@ -71,6 +71,25 @@ test_that("H_1 of circle has large cycle",{
 	expect_equal(H_1[2],Inf)
 })
 
+#Test 6: H_1 of cicle using diagram
+test_that("H_1 of circle has large cycle with diagram",{
+	#Sample from circle
+	points = CircleUnif(900, rad=10)
+	pd = diagram_pc(points, dim_max=1, threshold=5)
+	pd2 = diagram(points, type='point-cloud', dim_max=1, threshold=5)
+	H_11 = pd$pairs[[2]]
+	H_12 = pd2$pairs[[2]]
+	expect_equal(H_11, H_12)
+})
 
+#Test 7: H_0 of two points outside threshold using diagram
+test_that("H_0 of two points within threshold is correct with diagram", {
+	p1 = c(0,0)
+	p2 = c(3,0)
+	pd = diagram(cbind(p1,p2), type='point-cloud',dim_max=0, threshold=0.5)
+	H_0 = pd$pairs[[1]]
+	expected = cbind(c(0,0), c(Inf,Inf))
+	expect_equal(H_0, expected)
+})
 
 #NEED TODO: Test Mod

@@ -994,6 +994,7 @@ Rcpp::List rip_raw(std::vector<float>& distances, int modulus, int dim_max, floa
 	}
 	if (threshold == std::numeric_limits<value_t>::max() || threshold == -1) threshold = enclosing_radius;
 
+
 	for (auto d : dist.distances) {
 		min = std::min(min, d);
 		max = std::max(max, d);

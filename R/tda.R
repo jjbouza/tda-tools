@@ -89,11 +89,11 @@ average <- function(PersistenceLanscapeList){
 diagram <- function(input, type, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0){
 	out <- NULL
 	if(type == 'point-cloud'){
-		out <- diagram_pc(input, modulus, dim_max, threshold, do_cocycles)
+		out <- diagram_pc(input, dim_max, threshold, modulus, do_cocycles)
 	}
 	
 	if(type == 'distance-matrix'){
-		out <- diagram_dm(input, modulus, dim_max, threshold, do_cocycles)
+		out <- diagram_dm(input, dim_max, threshold, modulus, do_cocycles)
 	}
 
 	return (out)
