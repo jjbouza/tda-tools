@@ -11,3 +11,4 @@ Imports: Rcpp (>= 0.12.16)
 Depends: Rcpp
 RcppModules: landscape, diagram
 LinkingTo: Rcpp
+Suggests: testthat

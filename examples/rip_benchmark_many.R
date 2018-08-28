@@ -8,7 +8,7 @@ point_mat <- matrix(c(x,y),nrow=length(x))
 
 start_time <- Sys.time()
 for(i in 1:1000){
-	pd <- diagram_pc(point_mat, 2, 2, 2, 1)
+	pd <- diagram_pc(point_mat, 2, 2)
 }
 end_time <- Sys.time()
 print('tda-tools')

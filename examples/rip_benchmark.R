@@ -1,12 +1,12 @@
 library('methods')
 library('tdatools')
+
 source('torus_sample.R')
 
 point_mat <- TorusUnif(5000,1,5)
 
 start_time1 <- Sys.time()
-pd <- diagram_pc(point_mat, 2, 2, 1, 1)
-print(pd)
+pd <- diagram_pc(point_mat, 2, 2)
 end_time1 <- Sys.time()
 
 source("ripser_wrapper.R")
@@ -16,7 +16,6 @@ end_time <- Sys.time()
 
 print('tda-tools Result:')
 print(pd)
-
 print('ripser_wrapper.R Result:')
 print(pd2)
 
@@ -28,3 +27,4 @@ print('ripser_wrapper:')
 print(end_time-start_time)
 
 
+print(pd$pairs)

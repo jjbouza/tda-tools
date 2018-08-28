@@ -9,7 +9,7 @@ points = TorusUnif(5000,1,5)
 
 print('Computing PD...')
 #Compute persistence:
-pd <- diagram(points, 'point-cloud', modulus=2, dim_max=2,threshold=1,do_cocycles=0)
+pd <- diagram(points, 'point-cloud', dim_max=2,threshold=1, modulus=2, do_cocycles=0)
 
 #Calculuate PL by going directly to Discrete (my method)
 begin = Sys.time()
