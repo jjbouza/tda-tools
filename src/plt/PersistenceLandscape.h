@@ -185,7 +185,7 @@ public:
     bool testLandscape( const PersistenceBarcodes& b );//for tests only!
 
     PersistenceLandscape(){this->dimension = 0;}
-    PersistenceLandscape( const PersistenceBarcodes& p, bool exact=true, double dx=0.01);
+    PersistenceLandscape( const PersistenceBarcodes& p, bool exact=true, double dx=0.01, double min_x=0, double max_x=10);
     PersistenceLandscape operator=( const PersistenceLandscape& org );
     PersistenceLandscape(const PersistenceLandscape&);
     PersistenceLandscape(char* filename);
@@ -1322,7 +1322,7 @@ bool check( unsigned i , std::vector< std::pair<double,double> > v )
 
 
 
-PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool exact, double grid_diameter )
+PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool exact, double grid_diameter, double min_x, double max_x )
 {
     bool dbg = false;
     if ( dbg ){cerr << "PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p )" << endl;}
@@ -1496,7 +1496,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         //in this case useGridInComputations is true, therefore we will build a landscape on a grid.
         double gridDiameter = grid_diameter;
         this->dimension = p.dimensionOfBarcode;
-        std::pair<double,double> minMax = p.minMax();
+        std::pair<double,double> minMax = std::make_pair(min_x, max_x);
         size_t numberOfBins = 2*((minMax.second - minMax.first)/gridDiameter)+1;
 
         //first element of a pair std::pair< double , std::vector<double> > is a x-value. Second element is a vector of values of landscapes.
@@ -1506,34 +1506,25 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         //Now, the idea is to iterate on this->land[lambda-1] and use only points over there. The problem is at the very beginning, when there is nothing
         //in this->land. That is why over here, we make a fate this->land[0]. It will be later deteted before moving on.
         std::vector< std::pair<double,double> > aa;
-        //aa.push_back( std::make_pair( INT_MIN , 0 ) );
         double x = minMax.first;
         for ( size_t i = 0 ; i != numberOfBins ; ++i )
         {
             std::vector<double> v;
             std::pair< double , std::vector<double> > p = std::make_pair( x , v );
-            aa.push_back( std::make_pair( x , 0 ) );
             criticalValuesOnPointsOfGrid[i] = p;
-            if ( dbg ){cerr << "x : " << x << endl;}
+	    aa.push_back(std::make_pair(x,0));
             x += 0.5*gridDiameter;
         }
-        //aa.push_back( std::make_pair( INT_MAX , 0 ) );
-	//
 
-        if ( dbg ){cerr << "Grid has been created. Now, begin to add intervals \n";}
-
-        //for every peristent interval
+        //for every peristent interval, sample on grid.
         for ( size_t intervalNo = 0 ; intervalNo != p.size() ; ++intervalNo )
         {
             size_t beginn = (size_t)(2*( p.barcodes[intervalNo].first-minMax.first )/( gridDiameter ))+1;
-            if ( dbg ){cerr << "We are considering interval : [" << p.barcodes[intervalNo].first << "," << p.barcodes[intervalNo].second << "]. It will begin in  : " << beginn << " in the grid \n";}
-            while ( grid_diameter+criticalValuesOnPointsOfGrid[beginn].first < p.barcodes[intervalNo].second )
+
+            while ( criticalValuesOnPointsOfGrid[beginn].first < p.barcodes[intervalNo].second )
             {
-                if ( dbg )
-                {
-                    cerr << "Adding a value : (" << criticalValuesOnPointsOfGrid[beginn].first << "," << std::min( fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].first) ,fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].second) ) << ") " << endl;
-                }
                 criticalValuesOnPointsOfGrid[beginn].second.push_back(std::min( fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].first) ,fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].second) ) );
+		
                 ++beginn;
             }
         }
@@ -1546,71 +1537,18 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
             std::sort( criticalValuesOnPointsOfGrid[i].second.begin() , criticalValuesOnPointsOfGrid[i].second.end() , std::greater<int>() );
             if ( criticalValuesOnPointsOfGrid[i].second.size() > maxNonzeroLambda ){maxNonzeroLambda = criticalValuesOnPointsOfGrid[i].second.size();}
         }
-        if ( dbg )
+	
+	//Initialize to zero
+	this->land.resize(maxNonzeroLambda, aa);
+	
+	//Add values
+	for (unsigned int i = 0; i < criticalValuesOnPointsOfGrid.size(); i++)
         {
-            cerr << "After sorting \n";
-            for ( size_t i = 0 ; i != criticalValuesOnPointsOfGrid.size() ; ++i )
-            {
-                cerr << "x : " << criticalValuesOnPointsOfGrid[i].first << " : ";
-                for ( size_t j = 0 ; j != criticalValuesOnPointsOfGrid[i].second.size() ; ++j )
-                {
-                    cerr << criticalValuesOnPointsOfGrid[i].second[j] << " ";
-                }
-                cerr << "\n\n";
-            }
+        	for ( size_t lambda = 0 ; lambda <  criticalValuesOnPointsOfGrid[i].second.size(); ++lambda ){
+		   this->land[lambda][i] = std::make_pair(criticalValuesOnPointsOfGrid[i].first,criticalValuesOnPointsOfGrid[i].second[lambda]);
+	    }
         }
 
-        this->land.push_back(aa);
-        for ( size_t lambda = 0 ; lambda != maxNonzeroLambda ; ++lambda )
-        {
-            if ( dbg ){cerr << "Constructing lambda_" << lambda << endl;}
-            std::vector< std::pair<double,double> >  nextLambbda;
-            nextLambbda.push_back( std::make_pair(0,0) );
-            //for every element in the domain for which the previous landscape is nonzero.
-            bool wasPrevoiusStepZero = true;
-            size_t nr = 1;
-            while (  nr < this->land[ this->land.size()-1 ].size()-1 )
-            {
-                if (dbg) cerr << "nr : " << nr << endl;
-                size_t address = (size_t)(2*( this->land[ this->land.size()-1 ][nr].first-minMax.first )/( gridDiameter ));
-                if ( dbg )
-                {
-                    cerr << "We are considering the element x : " << this->land[ this->land.size()-1 ][nr].first << ". Its position in the structure is : " << address << endl;
-                }
-
-                if (  criticalValuesOnPointsOfGrid[address].second.size() <= lambda  )
-                {
-                    if (!wasPrevoiusStepZero)
-                    {
-                        wasPrevoiusStepZero = true;
-                        if ( dbg ){cerr << "AAAdding : (" << criticalValuesOnPointsOfGrid[address].first << " , " << 0 << ") to lambda_" << lambda << endl;getchar();}
-                        nextLambbda.push_back( std::make_pair( criticalValuesOnPointsOfGrid[address].first , 0 ) );
-                    }
-                }
-                else
-                {
-                     if ( wasPrevoiusStepZero )
-                     {
-                         if ( dbg ){cerr << "Adding : (" << criticalValuesOnPointsOfGrid[address-1].first << " , " << 0 << ") to lambda_" << lambda << endl;getchar();}
-                         nextLambbda.push_back( std::make_pair( criticalValuesOnPointsOfGrid[address-1].first , 0 ) );
-                         wasPrevoiusStepZero = false;
-                     }
-
-                     if ( dbg ){cerr << "AAdding : (" << criticalValuesOnPointsOfGrid[address].first << " , " << criticalValuesOnPointsOfGrid[address].second[lambda] << ") to lambda_" << lambda << endl;getchar();}
-                     nextLambbda.push_back( std::make_pair( criticalValuesOnPointsOfGrid[address].first , criticalValuesOnPointsOfGrid[address].second[lambda] ) );
-                }
-                ++nr;
-            }
-            if ( dbg ){cerr << "Done with : lambda_" << lambda << endl;getchar();getchar();getchar();}
-            if ( lambda == 0 )
-            {
-                //removing the first, fake, landscape
-                this->land.clear();
-            }
-            //nextLambbda.push_back( std::make_pair(INT_MAX,0) );
-            nextLambbda.erase( unique( nextLambbda.begin(), nextLambbda.end() ), nextLambbda.end() );
-            this->land.push_back( nextLambbda );
-        }
     }
 }
 

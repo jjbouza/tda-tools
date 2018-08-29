@@ -46,9 +46,9 @@ PLplot <- function(PersistenceLandscape, infinity_sub=-1){
 #' @param max_x Domain threshold for discrete PL.
 #' @param dx Domain grid diameter for discrete PL.
 #' @return A PersistenceLandscape object.
-landscape <- function(PersistenceDiagram, exact=FALSE, max_x=10, dx=0.1){
-	#Construct a persistence landscape
-	landscape_raw <- new(PersistenceLandscape, PersistenceDiagram, exact, max_x, dx)
+landscape <- function(PersistenceDiagram, exact=FALSE, dx=0.1,  min_x= 0, max_x=10){
+	#Construct a persistence landscape.
+	landscape_raw <- new(PersistenceLandscape, PersistenceDiagram, exact, min_x, max_x, dx)
 }
 
 #This can be done in C++ as well but the performance gains are essentially zero.

@@ -131,18 +131,25 @@ double innerProductDiscreteLandscapes(PersistenceLandscape l1, PersistenceLandsc
 	return integral_buffer;
 }
 
+std::vector<std::pair<double,double>> generateGrid(double start, double end, double dx){
+	std::vector<std::pair<double,double>> grid;
+	for(double current = start; current < end; current+=dx)
+		grid.push_back(std::make_pair(current, 0));
+	
+	return grid;
+}
 
 class PersistenceLandscapeInterface{
 public:
 	//Creates PL from PD
 	//TODO: Better defaults.
-	PersistenceLandscapeInterface(NumericMatrix persistence_diagram, bool exact=false, double max_pl=10, double dx=0.01) : exact(exact), max_pl(max_pl), dx(dx){
+	PersistenceLandscapeInterface(NumericMatrix persistence_diagram, bool exact=false, double min_pl=0, double max_pl=10, double dx=0.01) : exact(exact), min_pl(min_pl), max_pl(max_pl), dx(dx){
 		//Initalize a PersistenceLandscape object.
 		auto pd = PersistenceBarcodes(rDataProcess(persistence_diagram, max_pl));
-		PersistenceLandscapeInterface::pl_raw = PersistenceLandscape(pd, exact, dx);
+		PersistenceLandscapeInterface::pl_raw = PersistenceLandscape(pd, exact, 2*dx, min_pl, max_pl);
 	}
 
-	PersistenceLandscapeInterface(PersistenceLandscape pl, bool exact, double max_pl, double dx) : pl_raw(pl), exact(exact), max_pl(max_pl), dx(dx){}
+	PersistenceLandscapeInterface(PersistenceLandscape pl, bool exact, double min_pl, double max_pl, double dx) : pl_raw(pl), exact(exact), min_pl(min_pl), max_pl(max_pl), dx(dx){}
 
 
 	std::vector<NumericMatrix> getPersistenceLandscapeExact(){
@@ -177,7 +184,7 @@ public:
 		else
 			pl_out = PersistenceLandscape(addDiscreteLandscapes(pl_raw, other.pl_raw));
 		
-		return PersistenceLandscapeInterface(pl_out, exact, max_pl, dx);
+		return PersistenceLandscapeInterface(pl_out, exact, min_pl, max_pl, dx);
 	}
 
 
@@ -200,7 +207,7 @@ public:
 		else
 			pl_out = PersistenceLandscape(scaleDiscreteLandscapes(scale, pl_raw));
 
-		return PersistenceLandscapeInterface(pl_out, exact, max_pl, dx);
+		return PersistenceLandscapeInterface(pl_out, exact, min_pl,max_pl, dx);
 	}
 
 	
@@ -209,6 +216,7 @@ private:
 	bool exact;
 	PersistenceLandscape pl_raw;
 	double max_pl = 2;
+	double min_pl = 0;
 	double dx = 0.001;
 };
 

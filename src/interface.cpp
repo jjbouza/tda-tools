@@ -8,7 +8,7 @@ RCPP_EXPOSED_CLASS(PersistenceLandscapeInterface)
 RCPP_MODULE(Landscape) {
 
     class_<PersistenceLandscapeInterface>("PersistenceLandscape")
-    .constructor<NumericMatrix,bool,double,double>()
+    .constructor<NumericMatrix,bool,double,double,double>()
 
     .method("getExact", &PersistenceLandscapeInterface::getPersistenceLandscapeExact, "Returns the PL in the exact representation.")
     .method("getDiscrete", &PersistenceLandscapeInterface::getPersistenceLandscapeDiscrete, "Returns the PL in the discrete representation.")
