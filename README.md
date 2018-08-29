@@ -61,3 +61,5 @@ Now you should see a persistence pair born early and never dying. For example, I
 
 Meaning that a degree 1 persistence cycle was born at 0.3216 and did not die before the threshold value.
 
+The ```pd``` object also contains an ```pd$edges``` member which returns the number of edges used in the calculation by ripser. This can be useful for debuggining long calculation times. Finally ```pd$reps``` usually stores cocycle representitives, although in our case it will be empty since ```do_cocycles``` was not set to 1. A section on this feature will be added in the future.
+
