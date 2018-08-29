@@ -47,7 +47,19 @@ std::vector<std::pair<double, double>> rDataProcess(NumericMatrix pd, double max
 	return output;
 }
 
-std::vector<std::vector<std::pair<double, double>>> addDiscreteLandscapes(PersistenceLandscape l1, PersistenceLandscape l2){
+bool checkPairOfLandscapes(const PersistenceLandscape& l1, const PersistenceLandscape& l2){
+	if l1.min_pl != l2.min_pl || l1.max_pl != l2.max_pl || l1.dx != l2.dx
+		return false;
+	return true;
+}
+
+std::vector<std::vector<std::pair<double, double>>> addDiscreteLandscapes(const PersistenceLandscape& l1, const PersistenceLandscape& l2){
+	if !checkPairOfLandscapes(l1,l2) {
+		BEGIN_RCPP		
+		throw Rcpp::exception("Adding two landscapes with different initialization parameters.","pl.h")
+		END_RCPP
+	}
+
 	int min_level = std::min(l1.land.size(), l2.land.size());
 	std::vector<std::vector<std::pair<double, double>>> out;
 	for(int i = 0; i < min_level; i++){
@@ -176,7 +188,6 @@ public:
 	}
 
 	//Adds this to another PL
-	//We need to implement the appropriate functions for doing this with discrete representations.
 	PersistenceLandscapeInterface sum(const PersistenceLandscapeInterface& other){
 		PersistenceLandscape pl_out;
 		if(exact)
