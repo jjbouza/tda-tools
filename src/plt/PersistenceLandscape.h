@@ -1499,9 +1499,11 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         std::pair<double,double> minMax = std::make_pair(min_x, max_x);
         size_t numberOfBins = 2*((minMax.second - minMax.first)/gridDiameter)+1;
 
+
         //first element of a pair std::pair< double , std::vector<double> > is a x-value. Second element is a vector of values of landscapes.
         std::vector< std::pair< double , std::vector<double> > > criticalValuesOnPointsOfGrid(numberOfBins);
         //filling up the bins:
+	
 
         //Now, the idea is to iterate on this->land[lambda-1] and use only points over there. The problem is at the very beginning, when there is nothing
         //in this->land. That is why over here, we make a fate this->land[0]. It will be later deteted before moving on.
@@ -1521,13 +1523,16 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         {
             size_t beginn = (size_t)(2*( p.barcodes[intervalNo].first-minMax.first )/( gridDiameter ))+1;
 
-            while ( criticalValuesOnPointsOfGrid[beginn].first < p.barcodes[intervalNo].second )
+            while (beginn < criticalValuesOnPointsOfGrid.size())
             {
-                criticalValuesOnPointsOfGrid[beginn].second.push_back(std::min( fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].first) ,fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].second) ) );
-		
+		if (criticalValuesOnPointsOfGrid[beginn].first > p.barcodes[intervalNo].second)
+			criticalValuesOnPointsOfGrid[beginn].second.push_back(0.0);
+		else
+                	criticalValuesOnPointsOfGrid[beginn].second.push_back(std::min( fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].first) ,fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].second) ) );
                 ++beginn;
             }
         }
+
 
         //now, the basic structure is created. We need to translate it to a persistence landscape data structure.
         //To do so, first we need to sort all the vectors in criticalValuesOnPointsOfGrid[i].second
