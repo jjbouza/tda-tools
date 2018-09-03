@@ -4,28 +4,34 @@
 
 using namespace Rcpp;
 
+int TDIndex(int X, int Y, int Z, int x, int y, int z){
+	return x+X*(y+Y*z);
+}
 
-std::vector<NumericMatrix> persistenceLandscapeToR(std::vector<std::vector<std::vector<double>>> input){
-	std::vector<NumericMatrix> out; 
-	for(auto level : input){
-		NumericMatrix level_out(level.size(),2);
-		for(int i = 0; i < level.size(); i++){
-			level_out(i,0) = level[i][0];
-			level_out(i,1) = level[i][1];
+NumericVector persistenceLandscapeToR(std::vector<std::vector<std::vector<double>>> input){
+	Dimension d(input.size(), input[0].size(), 2);
+	NumericVector out(d[0]*d[1]*d[2]);
+	NumericVector out_d(d);
 
-			if(level[i][0] == INT_MAX)
-				level_out(i,0) = R_PosInf;
+	for(int j = 0; j < input.size(); j++){
+		for(int i = 0; i < input[0].size(); i++){
+			out[TDIndex(input.size(), input[0].size(), 2, j, i, 0)] = input[j][i][0];
+			out[TDIndex(input.size(), input[0].size(), 2, j, i, 1)] = input[j][i][1];
+
+			if(input[j][i][0] == INT_MAX)
+				out[TDIndex(input.size(), input[0].size(), 2, j, i, 0)] = R_PosInf;
 
 		}
-		out.push_back(level_out);
 	}
 
-	return out;
+	std::copy(out.begin(), out.end(), out_d.begin());
+	return out_d;
 }
+
 
 //need to figure out a better way of doing what the next two functions are doing.
 //Neccesary since Rcpp can not handle std::pair.
-std::vector<NumericMatrix> persistenceDataProcess(std::vector<std::vector<std::pair<double, double>>> pl){
+NumericVector persistenceDataProcess(std::vector<std::vector<std::pair<double, double>>> pl){
 	std::vector<std::vector<std::vector<double>>> out;
 	for(auto order : pl){
 		std::vector<std::vector<double>> order_vec;
@@ -47,18 +53,7 @@ std::vector<std::pair<double, double>> rDataProcess(NumericMatrix pd, double max
 	return output;
 }
 
-bool checkPairOfLandscapes(const PersistenceLandscape& l1, const PersistenceLandscape& l2){
-	if l1.min_pl != l2.min_pl || l1.max_pl != l2.max_pl || l1.dx != l2.dx
-		return false;
-	return true;
-}
-
 std::vector<std::vector<std::pair<double, double>>> addDiscreteLandscapes(const PersistenceLandscape& l1, const PersistenceLandscape& l2){
-	if !checkPairOfLandscapes(l1,l2) {
-		BEGIN_RCPP		
-		throw Rcpp::exception("Adding two landscapes with different initialization parameters.","pl.h")
-		END_RCPP
-	}
 
 	int min_level = std::min(l1.land.size(), l2.land.size());
 	std::vector<std::vector<std::pair<double, double>>> out;
@@ -137,10 +132,10 @@ double innerProductDiscreteLandscapes(PersistenceLandscape l1, PersistenceLandsc
 	for(int i = 0; i < min_level; i++){
 		int min_index = std::min(l1.land[i].size(), l2.land[i].size());
 		for(int j = 0; j < min_index; j++)
-			integral_buffer += l1.land[i][j].second*l2.land[i][j].second*dx;
+			integral_buffer += l1.land[i][j].second*l2.land[i][j].second;
 	}
 
-	return integral_buffer;
+	return integral_buffer*dx;
 }
 
 std::vector<std::pair<double,double>> generateGrid(double start, double end, double dx){
@@ -164,9 +159,9 @@ public:
 	PersistenceLandscapeInterface(PersistenceLandscape pl, bool exact, double min_pl, double max_pl, double dx) : pl_raw(pl), exact(exact), min_pl(min_pl), max_pl(max_pl), dx(dx){}
 
 
-	std::vector<NumericMatrix> getPersistenceLandscapeExact(){
+	NumericVector getPersistenceLandscapeExact(){
 		if (!exact){
-			std::cout << "Error: Can not convert a discrete PL to an exact PL.";
+			stop("Error: Can not convert a discrete PL to an exact PL.");
 		}
 
 		else{
@@ -174,7 +169,7 @@ public:
 		}
 	}
 	
-	std::vector<NumericMatrix> getPersistenceLandscapeDiscrete(){
+	NumericVector getPersistenceLandscapeDiscrete(){
 		if(exact){
 			return persistenceDataProcess(exactLandscapeToDiscrete(pl_raw.land, dx, max_pl));
 		}
@@ -183,7 +178,7 @@ public:
 		}
 	}
 
-	std::vector<NumericMatrix> getInternal(){
+	NumericVector getInternal(){
 		return persistenceDataProcess(pl_raw.land);
 	}
 
@@ -192,8 +187,12 @@ public:
 		PersistenceLandscape pl_out;
 		if(exact)
 			pl_out = pl_raw+other.pl_raw;
-		else
+		else{
+			if (!checkPairOfLandscapes(*this, other)) {
+				stop("Persistence Landscape Properties Do Not Match.");
+			}
 			pl_out = PersistenceLandscape(addDiscreteLandscapes(pl_raw, other.pl_raw));
+		}
 		
 		return PersistenceLandscapeInterface(pl_out, exact, min_pl, max_pl, dx);
 	}
@@ -222,7 +221,8 @@ public:
 	}
 
 	
-
+	
+		friend bool checkPairOfLandscapes(PersistenceLandscapeInterface& l1, const PersistenceLandscapeInterface& l2);
 private:
 	bool exact;
 	PersistenceLandscape pl_raw;
@@ -245,4 +245,10 @@ double PLinner(PersistenceLandscapeInterface p1, PersistenceLandscapeInterface p
 	return p1.inner(p2);
 }
 
+
+bool checkPairOfLandscapes(PersistenceLandscapeInterface& l1, const PersistenceLandscapeInterface& l2){
+	if(l1.min_pl != l2.min_pl || l1.max_pl != l2.max_pl || l1.dx != l2.dx)
+		return false;
+	return true;
+}
 
