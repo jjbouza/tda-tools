@@ -9,32 +9,17 @@ loadModule("Diagram", TRUE)
 #' Plot a persistenceLandscape object.
 #' @param PersistenceLandscape A PL object.
 #' @param  infinity_sub When using an exact representation, a value of Inf can appear in the PL. infinity_sub replaces
-#' this with a different value in the plot. If infinity_sub=-1 then the Inf point will be excluded. If infinity_sub is
-#' any other number then the Inf point will be replaced by that number.
+#' this with a different value in the plot.
 PLplot <- function(PersistenceLandscape, infinity_sub=-1){
 	
-	#Needed to process Inf values:
-	level_process <- function(level, infinity_sub){
-		level <- t(level)
-		if(infinity_sub == -1){
-			level <- level[,(1:dim(level)[2]-1)]
-		}
-
-		else{
-			level[level == Inf] <- infinity_sub
-		}
-
-
-		return(level)
-	}
-	
 	internal <- PersistenceLandscape$getInternal()
-	level1 <- level_process(internal[[1]], infinity_sub)
-	plot(level1[1,],level1[2,], type='l', xlab='x', ylab='')
+	internal[internal == Inf] <- infinity_sub
+	level1 <- internal[1,,]
+	plot(level1[,1],level1[,2], type='l', xlab='x', ylab='')
 
-	for(level in internal){
-		level <- level_process(level, infinity_sub)
-		lines(level[1,], level[2,])
+	for(level in dim(internal)[1]){
+		level_d <- internal[level,,]
+		lines(level_d[,1], level_d[,2])
 	}
 }
 
