@@ -8,7 +8,7 @@ Internal TDA pipeline used in Peter Bubenik's group at UF. Currently use's modif
 
 ## Quickstart Guide
 
-The tdatools package supports two major persistent homology operations: Persistence Diagram computation and Persistence
+The ```tdatools``` package supports two major persistent homology operations: Persistence Diagram computation and Persistence
 Landscape computation.
 
 ### Persistence Diagram Computation
@@ -18,7 +18,7 @@ The primary function to be aware of is
 diagram <- function(input, type, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0)
 ```
 
-The parameters are mostly self explanatory and are explained in the documentation. Say we want to compute first degree homology of points sampled from the unit circle. We can start by defining a function to uniformly sample from the circle.
+The parameters are mostly self explanatory. Say we want to compute first degree homology of points sampled from the unit circle. We can start by defining a function to uniformly sample from the circle.
 ```R
 CircleUnif <- function(n,rad=1,centre=c(0,0)){
           x0 <- centre[1] ; y0 <- centre[2]
@@ -26,16 +26,16 @@ CircleUnif <- function(n,rad=1,centre=c(0,0)){
           rad*cbind(x=cos(u)+x0, y=sin(u)+y0)
  }
  
- X = CircleUnif(100)
+ X <- CircleUnif(100)
 ```
 
 This function generated an N by 2 matrix corresponding to the point cloud sampled from the circle. Now the persistence diagram calculation is simple:
 
 ```R
-pd = diagram(X, 'point-cloud', dim_max=1, threshold=0.5)
+pd <- diagram(X, 'point-cloud', dim_max=1, threshold=0.5)
 ```
 Since we are satisfied with the other default parameters, we only change the ```dim_max``` parameter, which tells Ripser
-the top dimension to compute homology in. 
+the top dimension to compute homology in, and the ```threshold``` parameter, which tells Ripser when to stop the filtration.
 
 The ```pd``` object is a class with three members, which can be accessed by
 ```R pd$member```. The first class member is ```R pd$pairs```, which contains the persistence pairs calculated from X,
@@ -115,7 +115,7 @@ Now let us operate on landscapes. We can start by sampling from a circle again.
 ```R
 X2 <- CircleUnif(100)
 pd2 <- diagram(X2, 'point-cloud', dim_max=1, threshold=0.5)
-pl2 <- landscape(pd2$pairs[[2]], exact=FALSE, dx=0.1), min_x=0, max_x=1)
+pl2 <- landscape(pd2$pairs[[2]], exact=FALSE, dx=0.1, min_x=0, max_x=1)
 ```
 Lets calculate the sum of this landscape with the previous one.
 ```R
@@ -130,7 +130,8 @@ PLplot(pl_average)
 We should expect the average to be close to the originals. To test this we can compute the norm of the difference using
 the built in ```PLinner``` function.
 ```R
-inner <- PLinner(pl,pl_average)
+diff <- PLsum(pl,PLscale(-1,pl_average))
+inner <- PLinner(diff,diff)
 print(inner)
 ```
 As expected, ```inner``` is fairly small. 
