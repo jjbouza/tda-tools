@@ -26,13 +26,13 @@ CircleUnif <- function(n,rad=1,centre=c(0,0)){
           rad*cbind(x=cos(u)+x0, y=sin(u)+y0)
  }
  
- X = CircleUnif(100)
+ X <- CircleUnif(100)
 ```
 
 This function generated an N by 2 matrix corresponding to the point cloud sampled from the circle. Now the persistence diagram calculation is simple:
 
 ```R
-pd = diagram(X, 'point-cloud', dim_max=1, threshold=0.5)
+pd <- diagram(X, 'point-cloud', dim_max=1, threshold=0.5)
 ```
 Since we are satisfied with the other default parameters, we only change the ```dim_max``` parameter, which tells Ripser
 the top dimension to compute homology in. 
