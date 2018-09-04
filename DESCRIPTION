@@ -7,8 +7,8 @@ Author: Jose Bouza
 Maintainer: Jose Bouza <josejbouza@gmail.com>
 Description: Write this.
 License: GPL (>= 2)
-Imports: Rcpp (>= 0.12.16)
+Imports: Rcpp (>= 0.12.16), wesanderson
 Depends: Rcpp
 RcppModules: landscape, diagram
-LinkingTo: Rcpp
+LinkingTo: Rcpp, wesanderson
 Suggests: testthat

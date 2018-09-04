@@ -3,6 +3,10 @@ loadModule("Landscape", TRUE)
 loadModule("Diagram", TRUE)
 
 
+myColorRamp <- function(colors, values) {
+	library("wesanderson")
+        wes_palette('GrandBudapest1',values)
+}
 
 #Landscape R helper functions:
 
@@ -15,12 +19,14 @@ PLplot <- function(PersistenceLandscape, infinity_sub=-1){
 	internal <- PersistenceLandscape$getInternal()
 	internal[internal == Inf] <- infinity_sub
 	level1 <- internal[1,,]
-	plot(level1[,1],level1[,2], type='l', xlab='x')
+
+	cols <- myColorRamp(c("red", "blue"), dim(internal)[1])
+	plot(level1[,1],level1[,2], type='l', xlab='x', col=cols[1], lwd=2)
 
 	if(dim(internal)[1] > 1){
 		for(level in 2:dim(internal)[1]){
 			level_d <- internal[level,,]
-			lines(level_d[,1], level_d[,2])
+			lines(level_d[,1], level_d[,2], col=cols[level+1], lwd=2)
 		}
 	}
 }
@@ -52,8 +58,7 @@ average <- function(PersistenceLanscapeList){
 		i  = i + 1
 	}
 
-	#return(mean$scale(1.0/length(PersistenceLanscapeList)))
-	return(mean)
+	return(mean$scale(1.0/length(PersistenceLanscapeList)))
 }
 
 

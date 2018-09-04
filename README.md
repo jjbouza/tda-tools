@@ -1,14 +1,15 @@
 # tda-tools
 ## Author: Jose Bouza.
 
-Internal TDA pipeline used in Peter Bubenik's group at UF. Currently use's code from the following packages:
+Internal TDA pipeline used in Peter Bubenik's group at UF. Currently use's modified code from the following packages:
 1. The Ripser package by Ulrich Bauer: https://github.com/Ripser/ripser
 2. The fork of the Ripser package which adds some easier interfacing by Chris Tralie: https://github.com/ctralie/ripser
+3. The Persistence Landscape toolbox by Paweł Dłotko: https://www.math.upenn.edu/~dlotko/persistenceLandscape.html
 
 ## Quickstart Guide
 
-The tdatools package supports two major persistent homology operations: Persistence Diagram computation and Persistent
-Homology computation.
+The tdatools package supports two major persistent homology operations: Persistence Diagram computation and Persistence
+Landscape computation.
 
 ### Persistence Diagram Computation
 
@@ -44,7 +45,8 @@ indexed in a list by homology degree. So, for example, to view the degree 0 homo
 print(pd$pairs[[1]])
 ```
 
-You should see that all persitence pairs in degree 0 are born at 0 and die shortly after, which is what we expect.
+You should see that all persitence pairs in degree 0 are born at 0 and die shortly after, which is what we expect. The
+last pair in degree 0 homology should persist to ```Inf```.
 Note that R indexing causes 0 degree homology to be stored at index 1. In general n degree homology is stored in index n+1.
 Now lets look at homology in degree 1, which is what we were originally interested in.
 
@@ -62,4 +64,78 @@ Now you should see a persistence pair born early and never dying. For example, I
 Meaning that a degree 1 persistence cycle was born at 0.3216 and did not die before the threshold value.
 
 The ```pd``` object also contains an ```pd$edges``` member which returns the number of edges used in the calculation by ripser. This can be useful for debuggining long calculation times. Finally ```pd$reps``` usually stores cocycle representitives, although in our case it will be empty since ```do_cocycles``` was not set to 1. A section on this feature will be added in the future.
+
+
+### Persistence Landscape Calculation
+
+Here we will mainly use the function
+```R
+landscape <- function(PersistenceDiagram, exact=FALSE, dx=0.1,  min_x= 0, max_x=10, max_y=1000)
+```
+which is the primary constructor for landscape objects. This function will not return an R array, but rather an object
+that encapsulates the landscape operations and data. This allows us to perform operations on different types of
+landscapes without worrying about preprocessing the landscape representations. At any point the underlying landscape can
+be extracted using ```landscape$getInternal()```, which returns a three dimensional array of shape ```[levels, values,
+2]```. Lets see an example of this by continuing from the last example. First we will construct a discrete persistence
+landscape object with ```dx=0.05``` on the interval ```[0,1]```, with homology in degree 1 from the previous example as
+the input diagram.
+```R
+pl <- landscape(pd$pairs[[2]], exact=FALSE, dx=0.1, min_x=0, max_x=1)
+```
+
+Now lets see what the underlying landscape looks like:
+```R
+print(dim(pl$getInternal()))
+```
+I get ```1 11 2``` which means that our landscape has 1 level with 11 ```x, y``` pairs. Concretely,
+```R
+print(pl$getInternal()[1,,])
+```
+gives us the values of the first (and only) level. I get
+```R
+      [,1]       [,2]
+ [1,]  0.0 0.00000000
+ [2,]  0.1 0.00000000
+ [3,]  0.2 0.00000000
+ [4,]  0.3 0.00000000
+ [5,]  0.4 0.07286244
+ [6,]  0.5 0.17286244
+ [7,]  0.6 0.27286244
+ [8,]  0.7 0.37286244
+ [9,]  0.8 0.47286244
+[10,]  0.9 0.57286244
+[11,]  1.0 0.67286244
+```
+So we can see that the grid is spaced by ```dx=0.1``` and the lanscape is increasing along the input interval, as
+expected. We can also use the built in plotting function to visualize the landscape.
+```R
+PLplot(pl)
+```
+Now let us operate on landscapes. We can start by sampling from a circle again.
+```R
+X2 <- CircleUnif(100)
+pd2 <- diagram(X2, 'point-cloud', dim_max=1, threshold=0.5)
+pl2 <- landscape(pd2$pairs[[2]], exact=FALSE, dx=0.1), min_x=0, max_x=1)
+```
+Lets calculate the sum of this landscape with the previous one.
+```R
+pl_sum <- PLsum(pl,pl2)
+```
+This function checks that ```pl``` and ```pl2``` are compatible, i.e. are defined on the same grid and then adds the
+underlying landscapes. Now lets scale by ```0.5``` to compute the average of the two landscapes and plot.
+```R
+pl_average <- PLscale(0.5, pl_sum)
+PLplot(pl_average)
+```
+We should expect the average to be close to the originals. To test this we can compute the norm of the difference using
+the built in ```PLinner``` function.
+```R
+inner <- PLinner(pl,pl_average)
+print(inner)
+```
+As expected, ```inner``` is fairly small. 
+
+Note that all operations can also be done in-place as methods on landscapes. For example, ```PLsum(pl,pl2)``` is equivalent to ```pl$sum(pl2)```.
+
+
 
