@@ -1521,14 +1521,17 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         //for every peristent interval, sample on grid.
         for ( size_t intervalNo = 0 ; intervalNo != p.size() ; ++intervalNo )
         {
-            size_t beginn = (size_t)(2*( p.barcodes[intervalNo].first-minMax.first )/( gridDiameter ))+1;
+            //size_t beginn = (size_t)(2*( p.barcodes[intervalNo].first-minMax.first )/( gridDiameter ))+1;
+	    size_t beginn = 0;
 
             while (beginn < criticalValuesOnPointsOfGrid.size())
             {
-		if (criticalValuesOnPointsOfGrid[beginn].first > p.barcodes[intervalNo].second)
-			criticalValuesOnPointsOfGrid[beginn].second.push_back(0.0);
+		if (fabs(criticalValuesOnPointsOfGrid[beginn].first > p.barcodes[intervalNo].first) && fabs(criticalValuesOnPointsOfGrid[beginn].first < p.barcodes[intervalNo].second)){
+                	criticalValuesOnPointsOfGrid[beginn].second.push_back(std::min(fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].first) ,fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].second) ) );
+		}
 		else
-                	criticalValuesOnPointsOfGrid[beginn].second.push_back(std::min( fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].first) ,fabs(criticalValuesOnPointsOfGrid[beginn].first-p.barcodes[intervalNo].second) ) );
+			criticalValuesOnPointsOfGrid[beginn].second.push_back(0.0);
+
                 ++beginn;
             }
         }
@@ -1539,7 +1542,7 @@ PersistenceLandscape::PersistenceLandscape( const PersistenceBarcodes& p , bool 
         size_t maxNonzeroLambda = 0;
         for ( size_t i = 0 ; i != criticalValuesOnPointsOfGrid.size() ; ++i )
         {
-            std::sort( criticalValuesOnPointsOfGrid[i].second.begin() , criticalValuesOnPointsOfGrid[i].second.end() , std::greater<int>() );
+            std::sort( criticalValuesOnPointsOfGrid[i].second.begin() , criticalValuesOnPointsOfGrid[i].second.end(), std::greater<double>() );
             if ( criticalValuesOnPointsOfGrid[i].second.size() > maxNonzeroLambda ){maxNonzeroLambda = criticalValuesOnPointsOfGrid[i].second.size();}
         }
 	

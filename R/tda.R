@@ -15,9 +15,9 @@ PLplot <- function(PersistenceLandscape, infinity_sub=-1){
 	internal <- PersistenceLandscape$getInternal()
 	internal[internal == Inf] <- infinity_sub
 	level1 <- internal[1,,]
-	plot(level1[,1],level1[,2], type='l', xlab='x', ylab='')
+	plot(level1[,1],level1[,2], type='l', xlab='x')
 
-	for(level in dim(internal)[1]){
+	for(level in 2:dim(internal)[1]){
 		level_d <- internal[level,,]
 		lines(level_d[,1], level_d[,2])
 	}
