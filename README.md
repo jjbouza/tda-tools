@@ -115,7 +115,7 @@ Now let us operate on landscapes. We can start by sampling from a circle again.
 ```R
 X2 <- CircleUnif(100)
 pd2 <- diagram(X2, 'point-cloud', dim_max=1, threshold=0.5)
-pl2 <- landscape(pd2$pairs[[2]], exact=FALSE, dx=0.1), min_x=0, max_x=1)
+pl2 <- landscape(pd2$pairs[[2]], exact=FALSE, dx=0.1, min_x=0, max_x=1)
 ```
 Lets calculate the sum of this landscape with the previous one.
 ```R
