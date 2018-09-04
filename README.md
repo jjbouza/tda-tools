@@ -6,6 +6,19 @@ Internal TDA pipeline used in Peter Bubenik's group at UF. Currently use's modif
 2. The fork of the Ripser package which adds some easier interfacing by Chris Tralie: https://github.com/ctralie/ripser
 3. The Persistence Landscape toolbox by Paweł Dłotko: https://www.math.upenn.edu/~dlotko/persistenceLandscape.html
 
+### Installation Guide
+1. Since the package is not on CRAN, you will need to install devtools on your system. To do this just open an R session and run:
+install.packages(‘devtools’)
+
+2. Next clone the github repo either using
+git clone https://github.com/jjbouza/tda-tools.git
+or just download from Github using the green button.
+
+3. Run the install.sh bash script in the cloned repo using ./install.sh or bash install.sh, this script will compile the C++ code and install a package “tdatools” to your R package directory along with all of the dependencies. 
+
+
+Now you should be able to load the package normally from an R session using
+library(‘tdatools’)
 ## Quickstart Guide
 
 The ```tdatools``` package supports two major persistent homology operations: Persistence Diagram computation and Persistence
