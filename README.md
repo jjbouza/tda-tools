@@ -8,7 +8,7 @@ Internal TDA pipeline used in Peter Bubenik's group at UF. Currently use's modif
 
 ## Quickstart Guide
 
-The tdatools package supports two major persistent homology operations: Persistence Diagram computation and Persistence
+The ```tdatools``` package supports two major persistent homology operations: Persistence Diagram computation and Persistence
 Landscape computation.
 
 ### Persistence Diagram Computation
@@ -18,7 +18,7 @@ The primary function to be aware of is
 diagram <- function(input, type, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0)
 ```
 
-The parameters are mostly self explanatory and are explained in the documentation. Say we want to compute first degree homology of points sampled from the unit circle. We can start by defining a function to uniformly sample from the circle.
+The parameters are mostly self explanatory. Say we want to compute first degree homology of points sampled from the unit circle. We can start by defining a function to uniformly sample from the circle.
 ```R
 CircleUnif <- function(n,rad=1,centre=c(0,0)){
           x0 <- centre[1] ; y0 <- centre[2]
@@ -35,7 +35,7 @@ This function generated an N by 2 matrix corresponding to the point cloud sample
 pd <- diagram(X, 'point-cloud', dim_max=1, threshold=0.5)
 ```
 Since we are satisfied with the other default parameters, we only change the ```dim_max``` parameter, which tells Ripser
-the top dimension to compute homology in. 
+the top dimension to compute homology in, and the ```threshold``` parameter, which tells Ripser when to stop the filtration.
 
 The ```pd``` object is a class with three members, which can be accessed by
 ```R pd$member```. The first class member is ```R pd$pairs```, which contains the persistence pairs calculated from X,
