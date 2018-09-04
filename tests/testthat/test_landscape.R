@@ -78,7 +78,9 @@ test_that("PL sum is correct.", {
 	pd2 <- diagram_pc(Y, dim_max=1, threshold=2)
 	pl <- landscape(pd$pairs[[1]], exact=FALSE, max_x=2.5, dx=0.1)
 	pl2 <- landscape(pd2$pairs[[1]], exact=FALSE, max_x=2.5, dx=0.1)
-	
+	print(pd$pairs[[1]])
+	print(pl$getInternal()[1,,])
+
 	pl_d = pl$getInternal()
 	pl2_d = pl2$getInternal()
 

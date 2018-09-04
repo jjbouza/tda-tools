@@ -151,7 +151,7 @@ class PersistenceLandscapeInterface{
 public:
 	//Creates PL from PD
 	//TODO: Better defaults.
-	PersistenceLandscapeInterface(NumericMatrix persistence_diagram, bool exact=false, double min_pl=0, double max_pl=10, double dx=0.01, double max_y=10) : exact(exact), min_pl(min_pl), max_pl(max_pl), dx(dx){
+	PersistenceLandscapeInterface(NumericMatrix persistence_diagram, bool exact=false, double min_pl=0, double max_pl=10, double dx=0.01, double max_y=1000) : exact(exact), min_pl(min_pl), max_pl(max_pl), dx(dx){
 		//Initalize a PersistenceLandscape object.
 		auto pd = PersistenceBarcodes(rDataProcess(persistence_diagram, max_y));
 		PersistenceLandscapeInterface::pl_raw = PersistenceLandscape(pd, exact, 2*dx, min_pl, max_pl);
