@@ -11,7 +11,7 @@ int TDIndex(int X, int Y, int Z, int x, int y, int z){
 
 NumericVector persistenceLandscapeToR(std::vector<std::vector<std::vector<double>>> input){
 	Dimension d(input.size(), input[0].size(), 2);
-	NumericVector out(d[0]*d[1]*d[2]);
+	NumericVector out(input.size()*input[0].size()*2);
 	NumericVector out_d(d);
 
 	for(int j = 0; j < input.size(); j++){
