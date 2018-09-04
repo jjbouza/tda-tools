@@ -130,7 +130,8 @@ PLplot(pl_average)
 We should expect the average to be close to the originals. To test this we can compute the norm of the difference using
 the built in ```PLinner``` function.
 ```R
-inner <- PLinner(pl-pl_average,pl-pl_average)
+diff <- PLsum(pl,PLscale(-1,pl_average))
+inner <- PLinner(diff,diff)
 print(inner)
 ```
 As expected, ```inner``` is fairly small. 
