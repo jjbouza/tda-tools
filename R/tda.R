@@ -5,7 +5,7 @@ loadModule("Diagram", TRUE)
 
 myColorRamp <- function(colors, values) {
 	library("wesanderson")
-        wes_palette('GrandBudapest1',values)
+        wes_palette('GrandBudapest1',values,type='continuous')
 }
 
 #Landscape R helper functions:
@@ -29,6 +29,30 @@ PLplot <- function(PersistenceLandscape, infinity_sub=-1){
 			lines(level_d[,1], level_d[,2], col=cols[level+1], lwd=2)
 		}
 	}
+}
+
+PDplot <- function(PersistenceDiagram){
+	finite <- matrix(PersistenceDiagram[PersistenceDiagram[,2] != Inf], ncol=2)
+	infinite <- matrix(PersistenceDiagram[PersistenceDiagram[,2] == Inf], ncol=2)
+	max = 0
+
+	if(dim(finite)[1] > 0){
+		max = rep(max(finite), dim(infinite)[1])
+		min_z = min(finite)
+		max_z = max(finite)
+		plot(finite[,1], finite[,2], xlim=c(min_z, max_z), ylim=c(min_z,max_z), col='blue')
+	}
+	else{
+		max = 1
+		plot(-1,-1, xlim=c(0,1), ylim = c(0,1))
+	}
+
+  	abline(0,1)
+	par(xpd=TRUE)
+	if (dim(infinite)[1] > 0){
+		points(infinite[,1], 1.1*max, pch=8, col='red')
+	}
+	par(xpd=FALSE)
 }
 
 
