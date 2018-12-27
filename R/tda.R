@@ -17,15 +17,22 @@ myColorRamp <- function(colors, values) {
 PLplot <- function(PersistenceLandscape, infinity_sub=-1){
 	
 	internal <- PersistenceLandscape$getInternal()
-	internal[internal == Inf] <- infinity_sub
-	level1 <- internal[1,,]
-
-	cols <- myColorRamp(c("red", "blue"), dim(internal)[1])
+    for(level in 1:length(internal)){
+        level_d <- internal[[level]]
+        if(infinity_sub != -1){
+            level_d[level_d == Inf] <- infinity_sub
+            level_d[level_d == -Inf] <- -infinity_sub
+        }
+    }
+	level1 <- internal[[1]]
+    
+    print(length(internal))
+	cols <- myColorRamp(c("red", "blue"), length(internal))
 	plot(level1[,1],level1[,2], type='l', xlab='x', col=cols[1], lwd=2)
 
-	if(dim(internal)[1] > 1){
-		for(level in 2:dim(internal)[1]){
-			level_d <- internal[level,,]
+	if(length(internal) > 1){
+		for(level in 2:length(internal)){
+			level_d <- internal[[level]]
 			lines(level_d[,1], level_d[,2], col=cols[level+1], lwd=2)
 		}
 	}

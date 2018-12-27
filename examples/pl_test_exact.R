@@ -4,16 +4,21 @@ library('tdatools')
 source('torus_sample.R')
 
 print('Sampling points...')
-points = TorusUnif(5000,1,5)
+points = TorusUnif(100,1,5)
 
 print('Computing PD...')
 #Compute persistence:
-pd <- diagram(points, 'point-cloud',dim_max=2,threshold=1)
-
+pd <- diagram(points, 'point-cloud',dim_max=2,threshold=10)
 
 print('Computing PL for 1-dim cycles...')
 pl <- landscape(pd$pairs[[2]], exact=TRUE)
-PLplot(pl)
+print("Barcodes: ")
+print(pd$pairs[[2]])
+print("Landscapes:")
+print(pl$getInternal()[[1]])
+PLplot(pl,1000)
+print("done")
+quit()
 
 print('Computing average persistence...')
 pl_list <- c()
