@@ -9,18 +9,42 @@ int TDIndex(int X, int Y, int Z, int x, int y, int z) {
   return x + X * (y + Y * z);
 }
 
-std::vector<NumericVector>
-persistenceLandscapeToR(std::vector<std::vector<std::pair<double, double>>> input) {
+NumericVector
+discretePersistenceLandscapeToR(std::vector<std::vector<std::pair<double,double>>> input) {
+  Dimension d(input.size(), input[0].size(), 2);
+  NumericVector out(input.size() * input[0].size() * 2);
+  NumericVector out_d(d);
+
+  for (int j = 0; j < input.size(); j++) {
+    for (int i = 0; i < input[0].size(); i++) {
+      out[TDIndex(input.size(), input[0].size(), 2, j, i, 0)] = input[j][i].first;
+      out[TDIndex(input.size(), input[0].size(), 2, j, i, 1)] = input[j][i].second;
+
+      if (input[j][i].first == INT_MAX)
+        out[TDIndex(input.size(), input[0].size(), 2, j, i, 0)] = R_PosInf;
+      if (input[j][i].first == INT_MIN)
+        out[TDIndex(input.size(), input[0].size(), 2, j, i, 0)] = R_NegInf;
+    }
+  }
+
+  std::copy(out.begin(), out.end(), out_d.begin());
+  return out_d;
+}
+
+std::vector<NumericVector> 
+exactPersistenceLandscapeToR( std::vector<std::vector<std::pair<double, double>>> input) {
   std::vector<NumericVector> out_d;
 
   for (int j = 0; j < input.size(); j++) {
     Dimension d(input[j].size(), 2);
-    NumericVector out(input[j].size()*2);
+    NumericVector out(input[j].size() * 2);
     NumericVector out_j(d);
 
     for (int i = 0; i < input[j].size(); i++) {
-      out[TDIndex(input.size(), input[j].size(), 2, j, i, 0)] = input[j][i].first;
-      out[TDIndex(input.size(), input[j].size(), 2, j, i, 1)] = input[j][i].second;
+      out[TDIndex(input.size(), input[j].size(), 2, j, i, 0)] =
+          input[j][i].first;
+      out[TDIndex(input.size(), input[j].size(), 2, j, i, 1)] =
+          input[j][i].second;
 
       if (input[j][i].first == INT_MAX)
         out[TDIndex(input.size(), input[j].size(), 2, j, i, 0)] = R_PosInf;
@@ -35,7 +59,6 @@ persistenceLandscapeToR(std::vector<std::vector<std::pair<double, double>>> inpu
 
   return out_d;
 }
-
 
 std::vector<std::pair<double, double>> rDataProcess(NumericMatrix pd,
                                                     double max) {
@@ -171,24 +194,24 @@ public:
     }
 
     else {
-      return persistenceLandscapeToR(pl_raw.land);
+      return exactPersistenceLandscapeToR(pl_raw.land);
     }
   }
 
-  std::vector<NumericVector> getPersistenceLandscapeDiscrete() {
+  NumericVector getPersistenceLandscapeDiscrete() {
     if (exact) {
-      return persistenceLandscapeToR(
+      return discretePersistenceLandscapeToR(
           exactLandscapeToDiscrete(pl_raw.land, dx, max_pl));
     } else {
-      return persistenceLandscapeToR(pl_raw.land);
+      return discretePersistenceLandscapeToR(pl_raw.land);
     }
   }
 
-  std::vector<NumericVector> getInternal() { 
-      if (PersistenceLandscapeInterface::exact == false)
-        return persistenceLandscapeToR(pl_raw.land); 
-      else
-          return persistenceLandscapeToR(pl_raw.land);
+  SEXP getInternal() {
+    if (PersistenceLandscapeInterface::exact == false)
+      return wrap(discretePersistenceLandscapeToR(pl_raw.land));
+    else
+      return wrap(exactPersistenceLandscapeToR(pl_raw.land));
   }
 
   // Adds this to another PL
