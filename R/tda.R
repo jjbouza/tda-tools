@@ -75,7 +75,6 @@ landscape <- function(PersistenceDiagram, exact=FALSE, dx=0.1,  min_x= 0, max_x=
 	landscape_raw <- new(PersistenceLandscape, PersistenceDiagram, exact, min_x, max_x, dx, max_y)
 }
 
-#This can be done in C++ as well but the performance gains are essentially zero.
 
 #' Compute average of list of landscapes.
 #'

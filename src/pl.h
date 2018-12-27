@@ -9,6 +9,10 @@ int TDIndex(int X, int Y, int Z, int x, int y, int z) {
   return x + X * (y + Y * z);
 }
 
+int TDIndex2(int X, int Y, int x, int y){
+  return x*Y+y;
+}
+
 NumericVector
 discretePersistenceLandscapeToR(std::vector<std::vector<std::pair<double,double>>> input) {
   Dimension d(input.size(), input[0].size(), 2);
@@ -38,24 +42,25 @@ exactPersistenceLandscapeToR( std::vector<std::vector<std::pair<double, double>>
   for (int j = 0; j < input.size(); j++) {
     Dimension d(input[j].size(), 2);
     NumericVector out(input[j].size() * 2);
-    NumericVector out_j(d);
+
 
     for (int i = 0; i < input[j].size(); i++) {
-      out[TDIndex(input.size(), input[j].size(), 2, j, i, 0)] =
+      out[TDIndex2(input[j].size(), 2, i, 0)] =
           input[j][i].first;
-      out[TDIndex(input.size(), input[j].size(), 2, j, i, 1)] =
+      out[TDIndex2(input[j].size(), 2, i, 1)] =
           input[j][i].second;
 
       if (input[j][i].first == INT_MAX)
-        out[TDIndex(input.size(), input[j].size(), 2, j, i, 0)] = R_PosInf;
+        out[TDIndex2(input[j].size(), 2, i, 0)] = R_PosInf;
 
       if (input[j][i].first == INT_MIN)
-        out[TDIndex(input.size(), input[j].size(), 2, j, i, 0)] = R_NegInf;
+        out[TDIndex2(input[j].size(), 2, i, 0)] = R_NegInf;
     }
-
-    std::copy(out.begin(), out.end(), out_j.begin());
-    out_d.push_back(out_j);
+    
+    out.attr("dim") = d;
+    out_d.push_back(out);
   }
+    
 
   return out_d;
 }
