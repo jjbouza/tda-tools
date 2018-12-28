@@ -10,7 +10,7 @@ int TDIndex(int X, int Y, int Z, int x, int y, int z) {
 }
 
 int TDIndex2(int X, int Y, int x, int y){
-  return x*Y+y;
+  return x+X*y;
 }
 
 NumericVector
@@ -56,7 +56,7 @@ exactPersistenceLandscapeToR( std::vector<std::vector<std::pair<double, double>>
       if (input[j][i].first == INT_MIN)
         out[TDIndex2(input[j].size(), 2, i, 0)] = R_NegInf;
     }
-    
+
     out.attr("dim") = d;
     out_d.push_back(out);
   }
@@ -227,7 +227,7 @@ public:
       pl_out = pl_raw + other.pl_raw;
     else {
       if (!checkPairOfLandscapes(*this, other)) {
-        stop("Persistence Landscape Properties Do Not Match.");
+        stop("Error: Persistence Landscape Properties Do Not Match.");
       }
       pl_out =
           PersistenceLandscape(addDiscreteLandscapes(pl_raw, other.pl_raw));

@@ -1406,6 +1406,7 @@ PersistenceLandscape::PersistenceLandscape(const PersistenceBarcodes &p,
     
     std::vector<std::pair<double, double>> characteristicPoints(
         p.barcodes.size());
+
     for (size_t i = 0; i != bars.size(); ++i) {
       characteristicPoints[i] =
           std::make_pair((bars[i].first + bars[i].second) / 2.0,
@@ -1478,6 +1479,7 @@ PersistenceLandscape::PersistenceLandscape(const PersistenceBarcodes &p,
 
       lambda_n.erase(std::unique(lambda_n.begin(), lambda_n.end()),
                      lambda_n.end());
+
       this->land.push_back(lambda_n);
     }
   } else {

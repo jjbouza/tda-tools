@@ -26,7 +26,6 @@ PLplot <- function(PersistenceLandscape, infinity_sub=-1){
     }
 	level1 <- internal[[1]]
     
-    print(length(internal))
 	cols <- myColorRamp(c("red", "blue"), length(internal))
 	plot(level1[,1],level1[,2], type='l', xlab='x', col=cols[1], lwd=2)
 

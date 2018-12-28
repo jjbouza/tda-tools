@@ -16,7 +16,7 @@ print("Barcodes: ")
 print(pd$pairs[[2]])
 print("Landscapes:")
 print(pl$getInternal())
-print("done")
+PLplot(pl)
 quit()
 
 print('Computing average persistence...')
