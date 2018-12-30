@@ -75,6 +75,8 @@ landscape <- function(PersistenceDiagram, exact=FALSE, dx=0.1,  min_x= 0, max_x=
 }
 
 
+#' Consider using divide and conquer algo. here.
+
 #' Compute average of list of landscapes.
 #'
 #' @param PersistenceLanscapeList A list of PersistenceLandscape objects.

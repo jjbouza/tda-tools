@@ -478,11 +478,12 @@ PersistenceBarcodes PersistenceLandscape::convertToBarcode() {
   // for the first level, find local maxima. They are points of the diagram.
   // Find local minima and put them to the vector v for every next level, find
   // local maxima and put them to the list L. Find local minima and put them to
-  // the list v2 Point belong to the persistence barcode if it belong to the list
-  // L, but do not belong to the list v. When you pick the peristence diagram
-  // points at this level, set v = v2. QUESTION -- is there any significnce of
-  // the points in those layers? They may give some layer-characteristic of a
-  // diagram and give a marriage between landscapes and diagrams.
+  // the list v2 Point belong to the persistence barcode if it belong to the
+  // list L, but do not belong to the list v. When you pick the peristence
+  // diagram points at this level, set v = v2. QUESTION -- is there any
+  // significnce of the points in those layers? They may give some
+  // layer-characteristic of a diagram and give a marriage between landscapes
+  // and diagrams.
 
   std::vector<std::pair<double, double>> persistencePoints;
   if (this->land[0].size()) {
@@ -1403,7 +1404,7 @@ PersistenceLandscape::PersistenceLandscape(const PersistenceBarcodes &p,
     std::vector<std::pair<double, double>> bars;
     bars.insert(bars.begin(), p.barcodes.begin(), p.barcodes.end());
     std::sort(bars.begin(), bars.end(), comparePoints2);
-    
+
     std::vector<std::pair<double, double>> characteristicPoints(
         p.barcodes.size());
 
@@ -1416,7 +1417,7 @@ PersistenceLandscape::PersistenceLandscape(const PersistenceBarcodes &p,
     std::vector<std::vector<std::pair<double, double>>> persistenceLandscape;
     while (!characteristicPoints.empty()) {
       std::vector<std::pair<double, double>> lambda_n;
-      lambda_n.push_back( std::make_pair( INT_MIN , 0 ) );
+      lambda_n.push_back(std::make_pair(INT_MIN, 0));
       lambda_n.push_back(std::make_pair(birth(characteristicPoints[0]), 0));
       lambda_n.push_back(characteristicPoints[0]);
 
@@ -1498,9 +1499,9 @@ PersistenceLandscape::PersistenceLandscape(const PersistenceBarcodes &p,
     // filling up the bins:
 
     // Now, the idea is to iterate on this->land[lambda-1] and use only points
-    // over there. The problem is at the very beginning, when there is nothing in
-    // this->land. That is why over here, we make a fate this->land[0]. It will
-    // be later deteted before moving on.
+    // over there. The problem is at the very beginning, when there is nothing
+    // in this->land. That is why over here, we make a fate this->land[0]. It
+    // will be later deteted before moving on.
     std::vector<std::pair<double, double>> aa;
     double x = minMax.first;
     for (size_t i = 0; i != numberOfBins; ++i) {
@@ -2017,9 +2018,9 @@ unsigned PersistenceLandscape::removePairsOfLocalMaximumMinimumOfEpsPersistence(
           (this->land[dim][nr].second != this->land[dim][nr + 1].second)) {
         // right now we modify only the lalues of a points. That means that
         // angles of lines in the landscape changes a bit. This is the easiest
-        // computational way of doing this. But I am not sure if this is the best
-        // way of doing such a reduction of nonessential critical points. Think
-        // about this!
+        // computational way of doing this. But I am not sure if this is the
+        // best way of doing such a reduction of nonessential critical points.
+        // Think about this!
         if (this->land[dim][nr].second < this->land[dim][nr + 1].second) {
           this->land[dim][nr].second = this->land[dim][nr + 1].second;
         } else {
@@ -2048,8 +2049,8 @@ void PersistenceLandscape::reduceAllPairsOfLowPersistenceMaximaMinima(
 bool reduceAlignedPointsBDG = false;
 void PersistenceLandscape::reduceAlignedPoints(
     double tollerance) // this parapeter says how much the coeficients a and b
-                       // in a formula y=ax+b may be different to consider points
-                       // aligned.
+                       // in a formula y=ax+b may be different to consider
+                       // points aligned.
 {
   for (size_t dim = 0; dim != this->land.size(); ++dim) {
     size_t nr = 1;
@@ -2387,78 +2388,42 @@ PersistenceLandscape
 operationOnPairOfLandscapes(const PersistenceLandscape &land1,
                             const PersistenceLandscape &land2,
                             double (*oper)(double, double)) {
+
   PersistenceLandscape result;
   std::vector<std::vector<std::pair<double, double>>> land(
       std::max(land1.land.size(), land2.land.size()));
   result.land = land;
 
   for (size_t i = 0; i != std::min(land1.land.size(), land2.land.size()); ++i) {
-    // Most of the following was rewritten by Jose Bouza, since the orginal code
-    // contained a subtle bug.
     std::vector<std::pair<double, double>> lambda_n;
-    std::vector<std::pair<double, double>> p_list = land1.land[i];
-    std::vector<std::pair<double, double>> q_list = land2.land[i];
-
     int p = 0;
     int q = 0;
+    while ((p + 1 < land1.land[i].size()) && (q + 1 < land2.land[i].size())) {
 
-    int last_p = 0;
-    int last_q = 0;
-
-    std::vector<std::pair<double, double>> p_buffer;
-    std::vector<std::pair<double, double>> q_buffer;
-
-    while ((p < p_list.size()) && (q < q_list.size())) {
-      int n = p + q;
-
-      if (p_list[p].first < q_list[q].first) {
-        if (n - last_p > 1) {
-          // interpolate all points in q_buffer, which should be between last_p
-          // and p.
-          int last_p_t = last_p - (q - q_buffer.size());
-          for (std::pair<double, double> point : q_buffer) {
-            lambda_n.push_back(std::make_pair(
-                point.first,
-                functionValue(p_list[last_p_t], p_list[p], point.first)));
-          }
-
-          q_buffer.clear();
-        }
-
-        p_buffer.push_back(p_list[p]);
-        last_p = n;
-        p++;
+      if (land1.land[i][p].first < land2.land[i][q].first) {
+        lambda_n.push_back(std::make_pair(
+            land1.land[i][p].first,
+            oper(land1.land[i][p].second,
+                 functionValue(land2.land[i][q - 1], land2.land[i][q],
+                               land1.land[i][p].first))));
+        ++p;
+        continue;
       }
-
-      else if (q_list[q].first < p_list[p].first) {
-
-        if (n - last_q > 1) {
-          // interpolate all points in p_buffer, which should be between last_q
-          // and q.
-          int last_q_t = last_q - (p - p_buffer.size());
-          for (std::pair<double, double> point : p_buffer) {
-            lambda_n.push_back(std::make_pair(
-                point.first,
-                functionValue(q_list[last_q_t], q_list[q], point.first)));
-          }
-
-          p_buffer.clear();
-        }
-
-        q_buffer.push_back(q_list[q]);
-        last_q = n;
-        q++;
+      if (land1.land[i][p].first > land2.land[i][q].first) {
+        lambda_n.push_back(std::make_pair(
+            land2.land[i][q].first,
+            oper(functionValue(land1.land[i][p], land1.land[i][p - 1],
+                               land2.land[i][q].first),
+                 land2.land[i][q].second)));
+        ++q;
+        continue;
       }
-
-      else {
-        lambda_n.push_back(std::make_pair(p_list[p].first,
-                                          p_list[p].second + q_list[q].second));
-        q_buffer.clear();
-        p_buffer.clear();
-        last_p = n;
-        last_q = n;
-        p++;
-        q++;
+      if (land1.land[i][p].first == land2.land[i][q].first) {
+        lambda_n.push_back(std::make_pair(
+            land2.land[i][q].first,
+            oper(land1.land[i][p].second, land2.land[i][q].second)));
+        ++p;
+        ++q;
       }
     }
     while ((p + 1 < land1.land[i].size()) && (q + 1 >= land2.land[i].size())) {
