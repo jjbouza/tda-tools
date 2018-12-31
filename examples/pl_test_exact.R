@@ -15,7 +15,7 @@ pl <- landscape(pd$pairs[[2]], exact=TRUE)
 PLplot(pl)
 
 pl_list <- c()
-for(i in 1:2){
+for(i in 1:100){
 	points = TorusUnif(100,0.4,1)
 	pd <- diagram(points, 'point-cloud', dim_max=2,threshold=3)
 	pl <- landscape(pd$pairs[[2]], exact=TRUE)
@@ -25,10 +25,9 @@ for(i in 1:2){
 
 print('Computing average persistence...')
 pl_average = average(pl_list)
-print(pl_average$getInternal())
 PLplot(pl_average)
 d = pl$add(pl_average$scale(-1))
-PLplot(d)
 
+print('Inner Product')
 print(PLinner(d,d))
 

@@ -8,6 +8,27 @@ myColorRamp <- function(colors, values) {
         wes_palette('GrandBudapest1',values,type='continuous')
 }
 
+accessLevel <- function(internal, level){
+    #Trick to check if internal is vector or list.
+    #From: https://stackoverflow.com/questions/19501186/how-to-test-if-object-is-a-vector
+    if (is.atomic(internal)){
+        return(internal[level,,])
+    }
+    else{
+        return(internal[[level]])
+    }
+
+}
+
+numLevels <- function(internal){
+    if (is.atomic(internal)){
+        return(dim(internal)[1])
+    }
+    else{
+        return(length(internal))
+    }
+}
+
 #Landscape R helper functions:
 
 #' Plot a persistenceLandscape object.
@@ -17,21 +38,21 @@ myColorRamp <- function(colors, values) {
 PLplot <- function(PersistenceLandscape, infinity_sub=-1){
 	
 	internal <- PersistenceLandscape$getInternal()
-    for(level in 1:length(internal)){
-        level_d <- internal[[level]]
+    for(level in 1:numLevels(internal)){
+        level_d <- accessLevel(internal,level)
         if(infinity_sub != -1){
             level_d[level_d == Inf] <- infinity_sub
             level_d[level_d == -Inf] <- -infinity_sub
         }
     }
-	level1 <- internal[[1]]
+	level1 <- accessLevel(internal,1)
     
-	cols <- myColorRamp(c("red", "blue"), length(internal))
+	cols <- myColorRamp(c("red", "blue"), numLevels(internal))
 	plot(level1[,1],level1[,2], type='l', xlab='x', col=cols[1], lwd=2)
 
-	if(length(internal) > 1){
-		for(level in 2:length(internal)){
-			level_d <- internal[[level]]
+	if(numLevels(internal) > 1){
+		for(level in 2:numLevels(internal)){
+			level_d <- accessLevel(internal,level)
 			lines(level_d[,1], level_d[,2], col=cols[level+1], lwd=2)
 		}
 	}

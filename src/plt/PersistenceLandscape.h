@@ -158,11 +158,6 @@ double functionValue(std::pair<double, double> p1, std::pair<double, double> p2,
   double a = (p2.second - p1.second) / (p2.first - p1.first);
   double b = p1.second - a * p1.first;
 
-  if (a * x + b < 0) {
-    std::cout << "Pair 1: " << p1 << "  , Pair 2: " << p2 << " x: " << x
-              << std::endl;
-  }
-
   return (a * x + b);
 }
 

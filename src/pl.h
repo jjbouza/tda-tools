@@ -119,21 +119,26 @@ scaleDiscreteLandscapes(double scale, PersistenceLandscape l) {
 }
 
 std::vector<std::vector<std::pair<double, double>>>
-exactLandscapeToDiscrete(PersistenceLandscape l, double dx, double max_x) {
+exactLandscapeToDiscrete(PersistenceLandscape l, double dx, double max_x, double min_x) {
   std::vector<std::vector<std::pair<double, double>>> out;
-  for (std::vector<std::pair<double, double>> level : l.land) {
+
+
+  for (unsigned i = 0; i < l.land.size(); i++) {
+
+    auto level = l.land[i];
     std::vector<std::pair<double, double>> level_out;
 
-    std::pair<double, double> previous_point = std::make_pair(0, 0);
-    double x_buffer = previous_point.first;
-    double y_buffer = previous_point.second;
+    double starting_y = l.computeValueAtAGivenPoint(i, min_x);
+    std::pair<double,double> startingPoint = std::make_pair(min_x, starting_y);
+    double x_buffer = startingPoint.first;
+    double y_buffer = startingPoint.second;
 
-    for (int i = 0; i < level.size(); i++) {
+    for (int i = 1; i < level.size(); i++) {
       std::pair<double, double> point = level[i];
       // Make sure slope is well defined:
-      if (point.first != previous_point.first) {
-        double delta_x = level[i].first - previous_point.first;
-        double delta_y = level[i].second - previous_point.second;
+      if (point.first != startingPoint.first) {
+        double delta_x = level[i].first - startingPoint.first;
+        double delta_y = level[i].second - startingPoint.second;
         double slope = delta_y / delta_x;
 
         while (x_buffer < point.first && x_buffer < max_x) {
@@ -143,7 +148,7 @@ exactLandscapeToDiscrete(PersistenceLandscape l, double dx, double max_x) {
         }
       }
 
-      previous_point = point;
+      startingPoint = point;
     }
 
     out.push_back(level_out);
@@ -206,7 +211,7 @@ public:
   NumericVector getPersistenceLandscapeDiscrete() {
     if (exact) {
       return discretePersistenceLandscapeToR(
-          exactLandscapeToDiscrete(pl_raw.land, dx, max_pl));
+          exactLandscapeToDiscrete(pl_raw.land, dx, max_pl, 0));
     } else {
       return discretePersistenceLandscapeToR(pl_raw.land);
     }
@@ -219,18 +224,51 @@ public:
       return wrap(exactPersistenceLandscapeToR(pl_raw.land));
   }
 
+  bool isExact() const {
+      return exact;
+  }
+
+  double getMax() const {
+      return max_pl;
+  }
+
+  double getMin() const {
+      return min_pl;
+  }
+
+  double getdx() const {
+       return dx;
+  }
+
   // Adds this to another PL
   PersistenceLandscapeInterface
   sum(const PersistenceLandscapeInterface &other) {
     PersistenceLandscape pl_out;
-    if (exact)
+
+    if (PersistenceLandscapeInterface::exact && other.isExact())
       pl_out = pl_raw + other.pl_raw;
-    else {
-      if (!checkPairOfLandscapes(*this, other)) {
+
+    else if (!PersistenceLandscapeInterface::exact && !other.isExact()){
+      if (!checkPairOfDiscreteLandscapes(*this, other)) {
         stop("Error: Persistence Landscape Properties Do Not Match.");
       }
       pl_out =
           PersistenceLandscape(addDiscreteLandscapes(pl_raw, other.pl_raw));
+    }
+
+    else{
+        //Conversions:
+        std::pair<bool,bool> conversions = operationOnPairOfLanscapesConversion(*this, other);
+
+        if(conversions.first == true){
+            auto conversion1 = exactLandscapeToDiscrete(this->pl_raw, other.dx, other.max_pl, other.min_pl);
+            pl_out = PersistenceLandscape(addDiscreteLandscapes(conversion1, other.pl_raw));
+        }
+
+        else if(conversions.second == true){
+            auto conversion2 = exactLandscapeToDiscrete(other.pl_raw, PersistenceLandscapeInterface::dx, PersistenceLandscapeInterface::max_pl, PersistenceLandscapeInterface::min_pl);
+            pl_out = PersistenceLandscape(addDiscreteLandscapes(conversion2, PersistenceLandscapeInterface::pl_raw));
+        }
     }
 
     return PersistenceLandscapeInterface(pl_out, exact, min_pl, max_pl, dx);
@@ -258,13 +296,16 @@ public:
     return PersistenceLandscapeInterface(pl_out, exact, min_pl, max_pl, dx);
   }
 
-  friend bool checkPairOfLandscapes(PersistenceLandscapeInterface &l1,
+  friend bool checkPairOfDiscreteLandscapes(PersistenceLandscapeInterface &l1,
+                                    const PersistenceLandscapeInterface &l2);
+
+  friend std::pair<bool, bool> operationOnPairOfLanscapesConversion(PersistenceLandscapeInterface &l1,
                                     const PersistenceLandscapeInterface &l2);
 
 private:
-  bool exact;
   PersistenceLandscape pl_raw;
   double max_pl = 2;
+  bool exact;
   double min_pl = 0;
   double dx = 0.001;
 };
@@ -284,9 +325,33 @@ double PLinner(PersistenceLandscapeInterface p1,
   return p1.inner(p2);
 }
 
-bool checkPairOfLandscapes(PersistenceLandscapeInterface &l1,
+bool checkPairOfDiscreteLandscapes(PersistenceLandscapeInterface &l1,
                            const PersistenceLandscapeInterface &l2) {
   if (l1.min_pl != l2.min_pl || l1.max_pl != l2.max_pl || l1.dx != l2.dx)
     return false;
   return true;
+}
+
+// For opeartions on two landscapes we need to know if the output will be discrete or exact.
+// The rules are:
+// Exact+Exact = Exact
+// Discrete+Discrete = Discrete
+// Exact+Discrete = Discrete
+// 
+// This function is for the third case, where we will need to convert one of the PL's to a discrete PL.
+// The two bools correspond to the two operands, and are one if we need to convert the operand to discrete.
+// In all other cases it is zero (false).
+std::pair<bool,bool> operationOnPairOfLanscapesConversion(PersistenceLandscapeInterface &pl1,
+                                        const PersistenceLandscapeInterface &pl2){
+    bool p1 = 0;
+    bool p2 = 0;
+
+    if(pl1.exact != pl2.exact){
+        if(pl1.exact == true)
+            p1 = 1;
+        else
+            p2 = 0;
+    }
+
+    return std::make_pair(p1,p2);
 }
