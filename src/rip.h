@@ -1027,7 +1027,7 @@ void ripser<sparse_distance_matrix>::assemble_columns_to_reduce(
   simplices.swap(next_simplices);
 }
 
-Rcpp::List ripserResultToR(ripserResults inp) {
+Rcpp::List ripserResultToR(ripserResults inp, int modulus, int dim_max, float threshold, int do_cocycles) {
   Rcpp::List ret;
   // Correctly format persistence pairs into a matrix.
   auto pairs = std::vector<Rcpp::NumericMatrix>();
@@ -1057,6 +1057,10 @@ Rcpp::List ripserResultToR(ripserResults inp) {
   }
   ret["reps"] = reps;
   ret["edges"] = inp.num_edges;
+  ret["param.modulus"] = modulus;
+  ret["param.dim_max"] = dim_max;
+  ret["param.threshold"] = threshold;
+  ret["param.cocycles"] = (bool)do_cocycles;
 
   return ret;
 }
@@ -1108,7 +1112,7 @@ Rcpp::List rip_raw(std::vector<float> &distances, int modulus, int dim_max,
   res.num_edges = num_edges;
 
   // Convert ripserResults to R.
-  return ripserResultToR(res);
+  return ripserResultToR(res, modulus, dim_max, threshold, do_cocycles);
 }
 
 // Will this be useful to interface?

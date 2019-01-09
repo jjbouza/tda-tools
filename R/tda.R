@@ -149,5 +149,5 @@ diagram_dm <- function(distances, dim_max=3, threshold=Inf, modulus=2, do_cocycl
 
 diagram_pc <- function(points, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0){
 	distances <- as.vector(dist(points))
-    	rip_raw(as.vector(distances), modulus, dim_max, threshold, do_cocycles)
+    rip_raw(as.vector(distances), modulus, dim_max, threshold, do_cocycles)
 }
