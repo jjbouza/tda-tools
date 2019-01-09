@@ -92,4 +92,31 @@ test_that("H_0 of two points within threshold is correct with diagram", {
 	expect_equal(H_0, expected)
 })
 
+#Test 8: distance_matrix input works with dist object
+test_that("Distance matrix input works with dist object",{
+    dm = as.dist(matrix(c(1,1,1,1), nrow=2, ncol=2))
+	pd = diagram_dm(dm, dim_max=0, threshold=3)
+	H_0 = pd$pairs[[1]]
+	expected = cbind(c(0,0), c(1,Inf))
+	expect_equal(H_0, expected)
+})
+
+#Test 9: distance_matrix input works with matrix object
+test_that("Distance matrix input works with dist object",{
+    dm = matrix(c(1,1,1,1), nrow=2, ncol=2)
+	pd = diagram_dm(dm, dim_max=0, threshold=3)
+	H_0 = pd$pairs[[1]]
+	expected = cbind(c(0,0), c(1,Inf))
+	expect_equal(H_0, expected)
+})
+
+#Test 10: distance_matrix input works with matrix object
+test_that("Distance matrix input works with dist object",{
+    dm = as.vector(as.dist(matrix(c(1,1,1,1), nrow=2, ncol=2)))
+	pd = diagram_dm(dm, dim_max=0, threshold=3)
+	H_0 = pd$pairs[[1]]
+	expected = cbind(c(0,0), c(1,Inf))
+	expect_equal(H_0, expected)
+})
+
 #NEED TODO: Test Mod

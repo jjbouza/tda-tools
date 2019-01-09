@@ -143,8 +143,28 @@ diagram <- function(input, type, dim_max=3, threshold=Inf, modulus=2, do_cocycle
 	return (out)
 }
 
+
 diagram_dm <- function(distances, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0) {
-	rip_raw(as.vector(distances), modulus, dim_max, threshold, do_cocycles)
+    #Process type of distance matrix:
+    dist_obj <- 0
+
+    if (class(distances) == "dist"){
+        dist_obj = as.vector(distances)
+    }
+
+    else if (class(distances) == "matrix"){
+        dist_obj = as.vector(as.dist(distances))
+    }
+
+    else if (is.vector(distances)){
+        dist_obj <- distances
+    }
+
+    else{
+        stop("Error: Distance matrix input type unsupported.")
+    }
+
+	rip_raw(dist_obj, modulus, dim_max, threshold, do_cocycles)
 }
 
 diagram_pc <- function(points, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0){
