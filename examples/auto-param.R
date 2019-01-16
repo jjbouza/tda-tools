@@ -9,6 +9,6 @@ print('Computing PD...')
 pd <- diagram(points, 'point-cloud', dim_max=2,threshold=1)
 
 print('Computing PL for 1-dim cycles...')
-pl <- landscape(pd, degree=1, exact=TRUE, max_x=2, dx=0.1)
+pl <- landscape(pd$pairs[[1]], exact=TRUE, max_x=2, dx=0.1)
 
 print(pl$getInternal()[1,,])

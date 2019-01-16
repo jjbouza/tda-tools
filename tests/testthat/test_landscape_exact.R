@@ -26,7 +26,6 @@ scale <- function(pl_exact, h){
         out[[i]] <- h*pl_exact[[i]]
         out <- list(out,h*pl_exact[[i]])
     }
-    print(length(out))
     
     return(out)
 }
@@ -65,7 +64,6 @@ test_that("PL scale is correct.", {
 	pl <- landscape(pd$pairs[[1]], exact=TRUE)
 	pl_d = pl$getInternal()
 
-    print(length(pl_d))
 	expect_equal(PLscale(0.5, pl)$getInternal(), scale(pl$getInternal(),0.5))
 })
 
@@ -94,3 +92,15 @@ test_that("getInternal from discrete is correct", {
 
 	expect_equal(pl$getInternal(), pl$getExact())
 })
+
+test_that("getInternal from discrete is correct from diagram", {
+	X <- CircleUnif(100)
+	pd <- diagram_pc(X, dim_max=1, threshold=2)
+	pl <- landscape(pd, degree=1, exact=TRUE, max_x=2.5, dx=0.1)
+
+	pdref <- diagram_pc(X, dim_max=1, threshold=2)
+	plref <- landscape(pd$pairs[[1]], exact=TRUE, max_x=2.5, dx=0.1, max_y=2)
+
+	expect_equal(pl$getInternal(), plref$getInternal())
+})
+
