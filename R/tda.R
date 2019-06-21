@@ -90,24 +90,21 @@ PDplot <- function(PersistenceDiagram){
 #' @param max_x Domain threshold for discrete PL.
 #' @param dx Domain grid diameter for discrete PL.
 #' @param degree If input is pd object then degree specifies which degree to select from.
+#' @param threshold Threshold used to compute PD (could be inf).
 #' @return A PersistenceLandscape object.
-landscape <- function(PersistenceDiagram, degree=NULL, exact=FALSE, dx=0.1,  min_x=0, max_x=10, threshold=1000){
+landscape <- function(PersistenceDiagram, degree=NULL, exact=FALSE, dx=0.1,  min_x=0, max_x=10, threshold=-1){
 
     diagram = NULL
+    max_y = threshold
     
     #Automatic parameter deduction logic:
     
     # Input is bd pairs (no threshold info).
     if( is.atomic(PersistenceDiagram) || is.null(PersistenceDiagram$param.threshold)){
         diagram = PersistenceDiagram
-        
-        #We check if diagram has max death value < infinity:
-        if(max(diagram[,2]) < Inf){
+
+        if(threshold == -1){
             max_y = max(diagram[,2])
-        }
-        
-        else{
-            max_y = max_y
         }
     }
     
@@ -125,9 +122,16 @@ landscape <- function(PersistenceDiagram, degree=NULL, exact=FALSE, dx=0.1,  min
         }
     }
 
+    
+    #sanity checks
+    if(is.null(diagram) || all(is.na(diagram))){
+        stop("Error: Empty persistence diagram.")
+    }
 
 	#Construct a persistence landscape.
 	landscape_raw <- new(PersistenceLandscape, diagram, exact, min_x, max_x, dx, max_y)
+
+    return(landscape_raw)
 }
 
 
