@@ -9,7 +9,7 @@ print('Computing PD...')
 pd <- diagram(points, 'point-cloud', dim_max=2, threshold=3)
 
 print('Computing PL for 1-dim cycles...')
-pl <- landscape(pd$pairs[[2]], exact=TRUE)
+pl <- landscape(pd$pairs[[2]], dx=0.01, max_x=2, threshold=pd$param.threshold)
 
 print(dim(pd$pairs[[2]]))
 print(pl$getInternal())

@@ -129,7 +129,7 @@ landscape <- function(PersistenceDiagram, degree=NULL, exact=FALSE, dx=0.1,  min
     }
 
 	#Construct a persistence landscape.
-	landscape_raw <- new(PersistenceLandscape, diagram, exact, min_x, max_x, dx, max_y)
+    landscape_raw <- new(PersistenceLandscape, diagram, exact, min_x, max_x, dx, max_y)
 
     return(landscape_raw)
 }
