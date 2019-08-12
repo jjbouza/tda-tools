@@ -1,4 +1,5 @@
 library('tdatools')
+library('methods')
 
 #DISCRETE Lanscape tests:
 
@@ -181,7 +182,7 @@ test_that("getInternal from discrete is correct from diagram", {
 	pl <- landscape(pd, degree=1, exact=FALSE, max_x=2.5, dx=0.1)
 
 	pdref <- diagram_pc(X, dim_max=1, threshold=2)
-	plref <- landscape(pd$pairs[[1]], exact=FALSE, max_x=2.5, dx=0.1, max_y=2)
+	plref <- landscape(pd$pairs[[1]], exact=FALSE, max_x=2.5, dx=0.1, threshold=2)
 
 	expect_equal(pl$getInternal(), plref$getInternal())
 })

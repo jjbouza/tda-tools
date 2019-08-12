@@ -1,4 +1,5 @@
 library('tdatools')
+library('methods')
 
 #EXACT Lanscape tests:
 
@@ -19,11 +20,10 @@ CircleUnif <- function(n,rad=1,centre=c(0,0)){
 	rad*cbind(x=cos(u)+x0, y=sin(u)+y0) 
 } 
 
-scale <- function(pl_exact, h){
+scale <- function(h, pl_exact){
     out <- list()
 
     for(i in 1:length(pl_exact)){
-        out[[i]] <- h*pl_exact[[i]]
         out <- list(out,h*pl_exact[[i]])
     }
     
@@ -62,9 +62,9 @@ test_that("PL scale is correct.", {
 	X <- CircleUnif(100)
 	pd <- diagram_pc(X, dim_max=1, threshold=2)
 	pl <- landscape(pd$pairs[[1]], exact=TRUE)
-	pl_d = pl$getInternal()
+	pl_d <- pl$getInternal()
 
-	expect_equal(PLscale(0.5, pl)$getInternal(), scale(pl$getInternal(),0.5))
+	expect_equal(scale(0.5, pl_d), PLscale(0.5, pl)$getInternal())
 })
 
 
@@ -99,7 +99,7 @@ test_that("getInternal from discrete is correct from diagram", {
 	pl <- landscape(pd, degree=1, exact=TRUE, max_x=2.5, dx=0.1)
 
 	pdref <- diagram_pc(X, dim_max=1, threshold=2)
-	plref <- landscape(pd$pairs[[1]], exact=TRUE, max_x=2.5, dx=0.1, max_y=2)
+	plref <- landscape(pd$pairs[[1]], exact=TRUE, max_x=2.5, dx=0.1, threshold=2)
 
 	expect_equal(pl$getInternal(), plref$getInternal())
 })

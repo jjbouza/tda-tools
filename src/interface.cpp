@@ -27,6 +27,7 @@ RCPP_MODULE(Landscape) {
   Rcpp::function("PLsum", &PLsum);
   Rcpp::function("PLscale", &PLscale);
   Rcpp::function("PLinner", &PLinner);
+  Rcpp::function("PLaverage", &PLaverage);
 }
 
 RCPP_MODULE(Diagram) { Rcpp::function("rip_raw", &rip_raw); }

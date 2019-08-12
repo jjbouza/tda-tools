@@ -22,7 +22,8 @@ for(i in 1:100){
 	pl_list <- c(pl_list, pl)
 }
 
-pl_average = average(pl_list)
+pl_average = PLaverage(pl_list)
+
 #pl-pl_average:
 d = pl$add(pl_average$scale(-1))
 print('Distance:')

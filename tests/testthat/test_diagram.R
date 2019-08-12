@@ -1,4 +1,5 @@
 library('tdatools')
+library('methods')
 #Tests for diamgram_pc function:
 
 #Test 1: H_0 of two points

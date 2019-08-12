@@ -135,24 +135,6 @@ landscape <- function(PersistenceDiagram, degree=NULL, exact=FALSE, dx=0.1,  min
 }
 
 
-#' Consider using divide and conquer algo. here.
-
-#' Compute average of list of landscapes.
-#'
-#' @param PersistenceLanscapeList A list of PersistenceLandscape objects.
-#' @return The average (in the vector space of PL's).
-average <- function(PersistenceLanscapeList){
-	mean = PLsum(PersistenceLanscapeList[[1]], PersistenceLanscapeList[[2]])
-	i = 3
-	while(i < length(PersistenceLanscapeList)){
-		mean = mean$add(PersistenceLanscapeList[[i]])
-		i  = i + 1
-	}
-
-	return(mean$scale(1.0/length(PersistenceLanscapeList)))
-}
-
-
 #Diagram R helper functions:
 
 #The R dist function is actually implemented efficiently in C. 

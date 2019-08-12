@@ -179,6 +179,7 @@ std::vector<std::pair<double, double>> generateGrid(double start, double end,
   return grid;
 }
 
+
 class PersistenceLandscapeInterface {
 public:
   // Creates PL from PD
@@ -309,6 +310,17 @@ private:
   double min_pl = 0;
   double dx = 0.001;
 };
+
+PersistenceLandscapeInterface PLaverage(List p){
+
+    PersistenceLandscapeInterface out = as<PersistenceLandscapeInterface>(p[0]);
+
+    for (int i = 1; i < p.size(); i++){
+        out = out.sum(as<PersistenceLandscapeInterface>(p[i]));
+    }
+
+    return out.scale(1/p.size());
+}
 
 PersistenceLandscapeInterface PLsum(PersistenceLandscapeInterface p1,
                                     PersistenceLandscapeInterface p2) {
