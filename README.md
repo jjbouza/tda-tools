@@ -51,7 +51,7 @@ Since we are satisfied with the other default parameters, we only change the ```
 the top dimension to compute homology in, and the ```threshold``` parameter, which tells Ripser when to stop the filtration.
 
 The ```pd``` object is a class with three members, which can be accessed by
-```R pd$member```. The first class member is ```R pd$pairs```, which contains the persistence pairs calculated from X,
+```pd$member```. The first class member is ```pd$pairs```, which contains the persistence pairs calculated from X,
 indexed in a list by homology degree. So, for example, to view the degree 0 homology of X we can call
 
 ```R
