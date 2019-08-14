@@ -112,6 +112,8 @@ scaleDiscreteLandscapes(double scale, PersistenceLandscape l) {
     std::vector<std::pair<double, double>> level_out;
     for (std::pair<double, double> pair : level)
       level_out.push_back(std::make_pair(pair.first, scale * pair.second));
+    for (auto i : level_out){
+    }
     out.push_back(level_out);
   }
 
@@ -319,7 +321,7 @@ PersistenceLandscapeInterface PLaverage(List p){
         out = out.sum(as<PersistenceLandscapeInterface>(p[i]));
     }
 
-    return out.scale(1/p.size());
+    return out.scale(1.0/p.size());
 }
 
 PersistenceLandscapeInterface PLsum(PersistenceLandscapeInterface p1,

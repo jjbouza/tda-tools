@@ -120,6 +120,20 @@ test_that("scale PL is correct.", {
 	expect_equal(pl$scale(0.5)$getInternal(), scalePL(0.5, pl_d))
 })
 
+test_that("average PL is correct.", {
+	x <- CircleUnif(100)
+	y <- CircleUnif(100)
+	pd <- diagram_pc(x, dim_max=1, threshold=2)
+	pd2 <- diagram_pc(y, dim_max=1, threshold=2)
+	pl <- landscape(pd$pairs[[1]], exact=FALSE, max_x=2.5, dx=0.1)
+	pl2 <- landscape(pd2$pairs[[1]], exact=FALSE, max_x=2.5, dx=0.1)
+	
+	pl_d = pl$getInternal()
+	pl2_d = pl2$getInternal()
+        
+	expect_equal( scalePL(0.5, sumPL(pl_d, pl2_d)), PLaverage(list(pl,pl2))$getInternal())
+})
+
 test_that("PL inner is correct.", {
 	x <- CircleUnif(100)
 	y <- CircleUnif(100)
