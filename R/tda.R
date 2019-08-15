@@ -83,6 +83,30 @@ PDplot <- function(PersistenceDiagram){
 }
 
 
+death_vector <- function(PersistenceDiagram, threshold=-1){
+    diagram = NULL
+    max_y = threshold
+    
+    #Automatic parameter deduction logic:
+    
+    # Input is bd pairs (no threshold info).
+    if( is.atomic(PersistenceDiagram) || is.null(PersistenceDiagram$param.threshold)){
+        if(threshold != -1){
+            PersistenceDiagram[PersistenceDiagram[,2]==-1] <- threshold
+        }
+
+        diagram = PersistenceDiagram
+    }
+    
+    # Input is from diagram output.
+    else{
+        diagram = PersistenceDiagram$pairs[[1]]
+    }
+
+    dv <- sort(diagram[,2],decreasing=TRUE)
+    return(dv)
+}
+
 #' Compute landscape of a persistence diagram.
 #'
 #' @param PersistenceDiagram A pd object from the diagram function, or a list of pairs.
