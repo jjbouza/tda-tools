@@ -29,8 +29,6 @@ numLevels <- function(internal){
     }
 }
 
-#Landscape R helper functions:
-
 #' Plot a persistenceLandscape object.
 #' @param PersistenceLandscape A PL object.
 #' @param  infinity_sub When using an exact representation, a value of Inf can appear in the PL. infinity_sub replaces

@@ -5,10 +5,12 @@ Version: 1.0
 Date: 2018-05-15
 Author: Jose Bouza
 Maintainer: Jose Bouza <josejbouza@gmail.com>
-Description: Write this.
+Description: Collection of functions for TDA.
+Encoding: UTF-8
 License: GPL (>= 2)
 Imports: Rcpp (>= 0.12.16), wesanderson
 Depends: Rcpp
 RcppModules: landscape, diagram
 LinkingTo: Rcpp, wesanderson
 Suggests: testthat
+RoxygenNote: 6.1.1
