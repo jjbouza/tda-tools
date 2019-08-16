@@ -91,8 +91,9 @@ death_vector <- function(PersistenceDiagram, threshold=-1){
     
     # Input is bd pairs (no threshold info).
     if( is.atomic(PersistenceDiagram) || is.null(PersistenceDiagram$param.threshold)){
-        if(threshold != -1){
+        if(threshold != -1 && threshold != Inf){
             PersistenceDiagram[PersistenceDiagram[,2]==-1] <- threshold
+            PersistenceDiagram[PersistenceDiagram[,2]==Inf] <- threshold
         }
 
         diagram = PersistenceDiagram
@@ -101,7 +102,10 @@ death_vector <- function(PersistenceDiagram, threshold=-1){
     # Input is from diagram output.
     else{
         diagram = PersistenceDiagram$pairs[[1]]
-        diagram[diagram[,2]==-1] <- PersistenceDiagram$param.threshold
+        if(PersistenceDiagram$param.threshold != -1 && PersistenceDiagram$param.threshold != Inf){
+            diagram[diagram[,2]==-1] <- PersistenceDiagram$param.threshold
+            diagram[diagram[,2]==Inf] <- PersistenceDiagram$param.threshold
+        }
     }
 
     dv <- sort(diagram[,2],decreasing=TRUE)
