@@ -101,6 +101,7 @@ death_vector <- function(PersistenceDiagram, threshold=-1){
     # Input is from diagram output.
     else{
         diagram = PersistenceDiagram$pairs[[1]]
+        diagram[diagram[,2]==-1] <- PersistenceDiagram$param.threshold
     }
 
     dv <- sort(diagram[,2],decreasing=TRUE)
