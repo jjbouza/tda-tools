@@ -1,5 +1,6 @@
 #include "pl.h"
 #include "rip.h"
+#include "h0.h"
 #include <Rcpp.h>
 
 using namespace Rcpp;
