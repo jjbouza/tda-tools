@@ -5,11 +5,13 @@
 // efficient union-find based H_0 computation from a filtered graph
 
 
-// union-find data structure. Implements the efficient "disjoint-set forest" 
-// implementation. See Cormen et al. 21.3
+// union-find data structure. 
+// note: we do not use union-by-rank heuristic since we want the rep to always
+// be the vertex with earliest birth.
 class UnionFind{
     public:
-        UnionFind(const int N) : rank(N, 0), parent(N){
+        UnionFind(const int N, const std::vector<double>& vertex_values) : 
+                    parent(N), vertex_values(vertex_values){
             for(int i = 0; i < N; i++) 
                 parent[i] = i;
         }
@@ -22,34 +24,23 @@ class UnionFind{
             return UnionFind::parent[id];
         }
 
-        void make_set(){
-            UnionFind::parent.push_back(UnionFind::parent.size());
-            UnionFind::rank.push_back(0);
-        }
-
 
         void make_union(const int id1, const int id2){
-            UnionFind::make_link(UnionFind::find(id1), UnionFind::find(id2));
+            int rep1 = UnionFind::find(id1);
+            int rep2 = UnionFind::find(id2);
+            
+            if(rep1 != rep2){
+                if(vertex_values[rep1] > vertex_values[rep2])
+                    parent[rep1] = rep2;
+
+                else
+                    parent[rep2] = rep1;
+            }
         }
 
     private:
         std::vector<int> parent;
-        std::vector<int> rank;
-
-
-        void make_link(const int id1, const int id2){
-            //union by rank heuristic
-            if(UnionFind::rank[id1] > UnionFind::rank[id2])
-                UnionFind::parent[id2] = id1;
-
-            else{
-                UnionFind::parent[id1] = id2;
-
-                if(UnionFind::rank[id1] == UnionFind::rank[id2])
-                    UnionFind::rank[id1] += 1;
-
-            }
-        }
+        const std::vector<double>& vertex_values;
 };
 
 
@@ -60,15 +51,10 @@ struct edge_sorting_info{
     int index;
 };
 
-// Calculates H0 PD directly from filtered graph. Filtered graph represented by 
-// vertex birth times and edges at final filtration time.
 
-std::vector<std::pair<double, double>>
-H0_diagram(std::vector<std::pair<int,int>> edges, std::vector<double> vertex_births){
-   int V = vertex_births.size();
-   int E = edges.size();
-
-   // sort edges by time of last birth (break ties by first birth).
+// sort edges by time of last birth (break ties by first birth).
+std::vector<edge_sorting_info> 
+edge_sort(std::vector<std::pair<int,int>> edges, std::vector<double> vertex_births){
    std::vector<edge_sorting_info> edges_births;
    
    for(std::pair<int,int> vertices : edges){
@@ -84,14 +70,26 @@ H0_diagram(std::vector<std::pair<int,int>> edges, std::vector<double> vertex_bir
             [](const edge_sorting_info& a, const edge_sorting_info &b) -> bool 
             {return (a.last_birth > b.last_birth) || 
                     (a.last_birth == b.last_birth && a.first_birth > b.first_birth); });
+
+   return edges_births;
+}
+
+// Calculates H0 PD directly from filtered graph. Filtered graph represented by 
+// vertex birth times and edges at final filtration time.
+std::vector<std::pair<double, double>>
+H0_diagram(std::vector<std::pair<int,int>> edges, std::vector<double> vertex_births){
+   int V = vertex_births.size();
+   int E = edges.size();
+    
+   std::vector<edge_sorting_info> edge_births = edge_sort(edges, vertex_births);
    
    // start a union find class
-   UnionFind sets(V);
+   UnionFind sets(V, vertex_births);
     
    // persistence diagram
    std::vector<std::pair<double,double>> pd;
 
-   for(edge_sorting_info edge : edges_births){
+   for(edge_sorting_info edge : edge_births){
         //find connected component representatives for each vertex
         int first_vertex = sets.find(edges[edge.index].first);
         int second_vertex = sets.find(edges[edge.index].second);
