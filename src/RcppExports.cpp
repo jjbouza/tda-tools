@@ -8,10 +8,12 @@ using namespace Rcpp;
 
 RcppExport SEXP _rcpp_module_boot_Landscape();
 RcppExport SEXP _rcpp_module_boot_Diagram();
+RcppExport SEXP _rcpp_module_boot_H0();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_Landscape", (DL_FUNC) &_rcpp_module_boot_Landscape, 0},
     {"_rcpp_module_boot_Diagram", (DL_FUNC) &_rcpp_module_boot_Diagram, 0},
+    {"_rcpp_module_boot_H0", (DL_FUNC) &_rcpp_module_boot_H0, 0},
     {NULL, NULL, 0}
 };
 

@@ -1,5 +1,9 @@
 #include <vector>
 #include <algorithm>
+#include <iostream> //debugging
+#include <Rcpp.h>
+
+#include "rip.h"
 
 
 // efficient union-find based H_0 computation from a filtered graph
@@ -74,12 +78,13 @@ edge_sort(std::vector<std::pair<int,int>> edges, std::vector<double> vertex_birt
    return edges_births;
 }
 
+
+
 // Calculates H0 PD directly from filtered graph. Filtered graph represented by 
 // vertex birth times and edges at final filtration time.
 std::vector<std::pair<double, double>>
 H0_diagram(std::vector<std::pair<int,int>> edges, std::vector<double> vertex_births){
    int V = vertex_births.size();
-   int E = edges.size();
     
    std::vector<edge_sorting_info> edge_births = edge_sort(edges, vertex_births);
    
@@ -91,31 +96,56 @@ H0_diagram(std::vector<std::pair<int,int>> edges, std::vector<double> vertex_bir
 
    for(edge_sorting_info edge : edge_births){
         //find connected component representatives for each vertex
-        int first_vertex = sets.find(edges[edge.index].first);
-        int second_vertex = sets.find(edges[edge.index].second);
-        
-        //find death, birth of connected component
-        int death_value = std::max(vertex_births[edges[edge.index].first],
-                                   vertex_births[edges[edge.index].second]);
+        int first_vertex = sets.find(edges[edge.index].first-1);
+        int second_vertex = sets.find(edges[edge.index].second-1);
 
-        int birth_value = std::max(vertex_births[first_vertex], 
+        //find death, birth of connected component
+        double death_value = std::max(vertex_births[edges[edge.index].first-1],
+                                   vertex_births[edges[edge.index].second-1]);
+
+        double birth_value = std::max(vertex_births[first_vertex], 
                                    vertex_births[second_vertex]);
 
-        int birth_vertex = vertex_births[first_vertex] < vertex_births[second_vertex] ? 
-                            first_vertex : second_vertex;
-        
         // add to pd if valid interval
         if( birth_value != death_value )
-            pd.push_back(std::make_pair<double, double>(birth_value, death_value));
+            pd.push_back(std::make_pair(birth_value, death_value));
         
         // connect the two vertices.
-        sets.make_union(edges[edge.index].first, edges[edge.index].second);
+        sets.make_union(edges[edge.index].first-1, edges[edge.index].second-1);
    }
-
+    
    return pd;
 }
 
 
+
+
+//converts H0 results to common format as usual pd call
+Rcpp::List
+H0_diagram_interface(std::vector<int> edges, std::vector<double> vertex_births){
+    //reconstruct edge matrix
+    std::vector<std::pair<int,int>> edges_mat;
+
+    for(int i = 0; i < edges.size(); i+=2)
+        edges_mat.push_back(std::make_pair(edges[i], edges[i+1]));
+
+    std::vector<std::pair<double,double>> output = H0_diagram(edges_mat, vertex_births);
+    
+    ripserResults results;
+    results.births_and_deaths_by_dim = std::vector<std::vector<float>>();
+    results.num_edges = edges.size();
+
+    //unroll output
+    std::vector<float> dim0_unrolled;
+    results.births_and_deaths_by_dim.push_back(dim0_unrolled);
+
+    for(std::pair<double,double> interval : output){
+        results.births_and_deaths_by_dim[0].push_back(interval.first);
+        results.births_and_deaths_by_dim[0].push_back(interval.second);
+    }
+
+    return ripserResultToR(results, 2, 0, -1, 0);
+}
 
 
 

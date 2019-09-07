@@ -32,3 +32,4 @@ RCPP_MODULE(Landscape) {
 }
 
 RCPP_MODULE(Diagram) { Rcpp::function("rip_raw", &rip_raw); }
+RCPP_MODULE(H0) {Rcpp::function("H0_diagram_interface", &H0_diagram_interface); }

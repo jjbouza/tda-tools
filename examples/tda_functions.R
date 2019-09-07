@@ -1,5 +1,5 @@
 # tda_functions.R
-# Peter Bubenik, March 2018
+# Peter Bubenik, June 11, 2019
 
 
 eucl.dist <- function(x1, x2) sqrt(sum((x1 - x2) ^ 2))
@@ -111,7 +111,7 @@ pers_hom_filtered_triangulation <- function(triangles,triangle_values,grid_size,
   ph <- list(ph_0,ph_1)
 }
 
-pers_hom_filtered_graph <- function(edges,edge_values,grid_size,file,operating_system){
+pers_hom_filtered_graph_old <- function(edges,edge_values,grid_size,file,operating_system){
   edge_integer_values <- put_on_positive_integer_grid(edge_values,grid_size) # perseus wants integers other than -1 and 0
   edges_and_values <- cbind(edges,edge_integer_values)
   output_filename <- paste(file,".prs",sep="")
@@ -208,7 +208,6 @@ persistence_landscape_vector_int <- function(file,degree,max_depth){
 
 persistence_landscape_value <- function(PL,param_val){
   y_val <- 0
-  #Collection of pnts.
   for(i in 1:(dim(PL)[1]-1))
     if( (param_val >= PL[i,1]) & (param_val < PL[i+1,1]))
       y_val <- PL[i,2] + (param_val-PL[i,1]) * (PL[i+1,2]-PL[i,2]) / (PL[i+1,1]-PL[i,1])
@@ -321,8 +320,10 @@ pca_plot <- function(pl, main, labels, vector_length, plot_loadings = FALSE){
   # plot loading vectors
   loading_vectors <- t(pca$rotation)
   if (plot_loadings==TRUE)
-    for (j in 1:3)
+    for (j in 1:5)
       plot_persistence_landscape_from_vector(loading_vectors[j,],vector_length,paste(main,"loading vector",j))
+  # static 2d scatterplot
+  plot(pca$x[,1:2],main=main,col=labels,pch=17+(2*labels))
   # static 3d scatterplot
   s3d <- scatterplot3d(pca$x[,1],pca$x[,2],pca$x[,3],color="blue",pch=19,type="h",xlab="pca1",ylab="pca2",zlab="pca3",main=main)
   s3d.coords <- s3d$xyz.convert(pca$x[,1],pca$x[,2],pca$x[,3]) # get projected 2d coordinates
@@ -335,27 +336,30 @@ pca_plot <- function(pl, main, labels, vector_length, plot_loadings = FALSE){
 }
 
 pl_comparison <- function(plm_list, sample_classes, vector_length, classes_to_compare, N, cost, 
-                          degrees, class_names, death_vector = FALSE, num_to_skip = c(0,0,0,0,0,0)){
+                          degrees_to_use, use_death_vector = FALSE, num_to_skip = c(0,0,0,0,0,0)){
   require("scatterplot3d")
   num_classes <- length(sample_classes)
   ii <- 1:num_classes # find figures corresponding to the two groups
   group1 <- ii[which(sample_classes[]==classes_to_compare[1])]
   group2 <- ii[which(sample_classes[]==classes_to_compare[2])]
   comparison_classes <- c(sample_classes[group1],sample_classes[group2])
-#  degree <- 1 # degree of homology to use
-  for (degree in degrees){ # for each degree of homology
+  degree <- 1 # degree of homology to use
+  for (degree in degrees_to_use){ # for each degree of homology
     # plot Average Persistence Landscapes and their difference
     pl_matrix <- plm_list[[degree+1]]
-    if (death_vector == TRUE && degree == 0){
-      pl_matrix <- pl_matrix[,-(1:num_to_skip[1])]
-    } else{
-      pl_matrix <- pl_matrix[,-(1:(num_to_skip[degree+1]*length(pl_param_vals)))]
+    if (num_to_skip[degree+1]>0)
+    {
+      if (use_death_vector == TRUE && degree == 0){
+        pl_matrix <- pl_matrix[,-(1:num_to_skip[degree+1])]
+      } else{
+        pl_matrix <- pl_matrix[,-(1:(num_to_skip[degree+1]*length(pl_param_vals)))]
+      }
     }
     pl1 <- pl_matrix[group1,]
     pl2 <- pl_matrix[group2,]
     apl1 <- colMeans(pl1)
     apl2 <- colMeans(pl2)
-    if (death_vector == TRUE && degree == 0){
+    if (use_death_vector == TRUE && degree == 0){
       vl <- length(apl1)
       } else{
       vl <- vector_length
@@ -367,7 +371,7 @@ pl_comparison <- function(plm_list, sample_classes, vector_length, classes_to_co
     p_value <- permutation_test(pl1,pl2,N)
     print(paste("Permutation test in degree",degree,":",p_value)) # deg 0: 0.0005, deg 1: 0.0004, deg 2: 0.0006
     # Principal Component Analysis
-    pca <- pca_plot(pl=rbind(pl1,pl2),main=paste("PCA for PL in degree",degree),labels=comparison_classes,vl)
+    pca <- pca_plot(pl=rbind(pl1,pl2),main=paste("PCA for PL in degree",degree),labels=comparison_classes,vl,TRUE)
     # Classification using Support Vector Machine applied to first 3 PCA coordinates
     svm3d(pca$x[,1], pca$x[,2], pca$x[,3], c(rep(-1,length(group1)),rep(1,length(group2))), comparison_classes, 
           "pca1", "pca2", "pca3",paste("PCA and SVM for PL in degree",degree), cost)
@@ -571,64 +575,6 @@ ripser2barcode <- function(filename){
   ph
 }
 
-pers_hom_ripser <- function(rip.input, 
-                                 rip.format, 
-                                 rip.threshold = -1,
-                                 rip.dim = -1){
-  # rip.input = point cloud or distance matrix
-  # rip.format = "point-cloud" or "lower-distance"
-  # rip.threshold = maximum diameter of Rips filtration, -1 for all diameters
-  # rip.dim = max dimension of homology computed, -1 for all dimensions
-  # by Alexander Wagner
-  
-  # Convert input to character array
-  if (rip.format == "point-cloud"){
-    rip.input <- do.call(paste, c(as.data.frame(rip.input)))
-  }
-  if (rip.format == "lower-distance"){
-    rip.input <- paste(t(rip.input)[upper.tri(rip.input)], collapse = " ")
-  }
-  
-  # Create system command based on whether threshold or not
-  rip.args <- paste("--format", rip.format)
-  if (rip.dim != -1){
-    rip.args <- paste(rip.args, paste("--dim", rip.dim))
-  }
-  if (rip.threshold != -1){
-    rip.args <- paste(rip.args, paste("--threshold", rip.threshold))
-  }
-  
-  # Use Ripser
-  barcode <- system2(command = "./bin/ripser", args = rip.args, 
-                     stdout = TRUE,
-                     input = rip.input)
-  
-  # Convert text output to list of matrices giving barcodes
-  new.degree <- grepl(pattern = "persistence", x = barcode)
-  new.degrees.at <- which(new.degree)
-  ph <- vector("list", length(new.degrees.at))
-  new.degrees.at <- c(new.degrees.at, (length(barcode) + 1))
-  for (i in 1:(length(new.degrees.at) - 1)){
-    num.pairs <- new.degrees.at[i + 1] - new.degrees.at[i] - 1
-    bd.pairs <- matrix(0, nrow = num.pairs, ncol = 2)
-    for (j in 1:num.pairs){
-      pair.string <- gsub(")", "", 
-                          gsub("[", "", 
-                               gsub(" ", "",
-                                    barcode[j + new.degrees.at[i]], 
-                                    fixed=T), 
-                               fixed=T), 
-                          fixed=T)
-      pair <- scan(text = pair.string, sep = ",", quiet = TRUE)
-      if (is.na(pair[2])){
-        pair[2] <- -1
-      }
-      bd.pairs[j, ] <- pair
-    }
-    ph[[i]] <- bd.pairs
-  }
-  return(ph)
-}
 
 pers_hom_rips_perseus <- function(points, step_size, num_steps, filename, binary_directory, operating_system){
   ambient_dim <- dim(points)[2]
@@ -719,12 +665,259 @@ persistence_landscape <- function(bd_list,max_filtration_value){
 }
 
 persistence_landscape_discretize <- function(pl_exact,pl_param_vals){
-  pl_vector <- list()
-    for (j in 1:length(pl_exact)){
+  pl_discrete <- list()
+  for (i in 1:length(pl_exact)){
+    pl_vector <- vector()
+    for (j in 1:length(pl_exact[[i]])){
       PLy <- rep(0,length(pl_param_vals))
       for (k in 1:length(pl_param_vals))
-        PLy[k] <- persistence_landscape_value(pl_exact[[j]],pl_param_vals[k])
+        PLy[k] <- persistence_landscape_value(pl_exact[[i]][[j]],pl_param_vals[k])
       pl_vector <- c(pl_vector,PLy)
     }
-  pl_vector
+    pl_discrete[[i]] <- pl_vector
+  }
+  pl_discrete
+}
+      
+pers_hom_ripser <- function(rip.input, rip.format, rip.dim, rip.threshold = -1){
+  # Alexander Wagner, April 2018
+  # rip.input = point cloud or below diagonal distance matrix
+  # rip.format = "point-cloud" or "lower-distance"
+  # rip.dim = max degree of homology computed
+  # rip.threshold = maximum diameter of Rips filtration, -1 for all diameters
+  
+  # Convert input to character array.
+  if (rip.format == "point-cloud"){
+    rip.input <- do.call(paste, c(as.data.frame(rip.input)))
+  }
+  if (rip.format == "lower-distance"){
+    rip.input <- paste(t(rip.input)[upper.tri(rip.input)], collapse = " ")
+  }
+  
+  # Create system command based on format, homology degree, and threshold.
+  rip.args <- paste("--format", rip.format)
+  rip.args <- paste(rip.args, paste("--dim", rip.dim))
+  if (rip.threshold != -1){
+    rip.args <- paste(rip.args, paste("--threshold", rip.threshold))
+  }
+  
+  # Use Ripser.
+  barcode <- system2(command = "./bin/ripser", 
+                     args = rip.args, 
+                     stdout = TRUE,
+                     input = rip.input)
+  
+  # Convert text output to list of matrices giving barcodes
+  new.degrees.at <- which(grepl(pattern = "persistence", x = barcode))
+  ph <- vector("list", length(new.degrees.at))
+  for (i in 1:length(new.degrees.at)){
+    if (i == length(new.degrees.at)){
+      num.pairs <- length(barcode) - new.degrees.at[i]
+    }
+    else{
+      num.pairs <- new.degrees.at[i + 1] - new.degrees.at[i] - 1
+    }
+    # Leave i-th persistence diagram empty if there are no bars.
+    if (num.pairs == 0){
+      break
+    }
+    bd.pairs <- matrix(0, nrow = num.pairs, ncol = 2)
+    for (j in 1:num.pairs){
+      pair.string <- gsub(")", "", 
+                          gsub("[", "", 
+                               gsub(" ", "",
+                                    barcode[j + new.degrees.at[i]], 
+                                    fixed=T), 
+                               fixed=T), 
+                          fixed=T)
+      pair <- scan(text = pair.string, sep = ",", quiet = TRUE)
+      if (is.na(pair[2])){
+        pair[2] <- -1
+      }
+      bd.pairs[j, ] <- pair
+    }
+    ph[[i]] <- bd.pairs
+  }
+  return(ph)
+}
+
+pers_landscape <- function(bd.list){
+  # Peter Bubenik and Alexander Wagner, April 2018
+  # bd.list = list of *x2 matrices representing bounded barcode in each degree
+  
+  for (i in 1:length(bd.list)){
+    # Skip i-th degree if barcode is empty.
+    if(is.null(bd.list[[i]])){
+      break
+    }
+    bd <- bd.list[[i]]
+    pl_text <- system2(command = "./bin/ComputePersistenceLandscape", 
+                       stdout = TRUE, 
+                       input = paste(t(bd), collapse = " "))
+    
+    # Convert text output to list of matrices giving persistent landscape 
+    # critical points and values.
+    label.locations <- c(which(grepl(pattern = "#", x = pl_text)),
+                         length(pl_text) + 1)
+    pl <- vector("list", length = length(label.locations) - 1)
+    for (j in 1:length(pl)){
+      num.crit.pts <- label.locations[j+1] - label.locations[j] - 1
+      lambda <- matrix(0, nrow = num.crit.pts, ncol = 2)
+      for (k in 1:num.crit.pts){
+        lambda[k, ] <- scan(text = pl_text[label.locations[j] + k],
+                            sep = " ",
+                            quiet = TRUE)
+      }
+      pl[[j]] <- lambda
+    }
+    bd.list[[i]] <- pl
+  }
+  return(bd.list)
+}
+
+pers_landscape_discretize <- function(pl, grid){
+  # Alexander Wagner, April 2018
+  # pl = output of pers_landscape restricted to a fixed degree of homology
+  # grid = list of length max depth, members are ordered vectors of x-values
+  
+  # Aux function to evaluate persistence landscape at grid values
+  eval_pl <- function(pl, grid.vec){
+    in.support <- (grid.vec > pl[1, 1] & grid.vec < pl[dim(pl)[1], 1])
+    x.vals <- grid.vec[in.support]
+    idx <- 1
+    x.idx <- rep(0, length(x.vals))
+    for(i in 1:length(x.vals)){
+      for(j in idx:length(pl[, 1]))
+        if(pl[j, 1] >= x.vals[i]){
+          x.idx[i] <- j
+          idx <- j
+          break
+        }
+    }
+    m <- sign(pl[x.idx, 2] - pl[x.idx - 1, 2])
+    grid.vec[in.support] <- pl[x.idx, 2] + m*(x.vals - pl[x.idx, 1])
+    grid.vec <- replace(x = grid.vec, list = !in.support, values = 0)
+    return(grid.vec)
+  }
+  
+  max.depth <- length(grid)
+  depth <- length(pl)
+  for(i in 1:max.depth){
+    if(i > depth){
+      grid[[i]] <- rep(0, length(grid[[i]]))
+    }
+    else{
+      grid[[i]] <- eval_pl(pl[[i]], grid[[i]])
+    }
+  }
+  return(grid)
+}
+
+sample_from_image <- function(image_matrix, num_points, threshold = 0){
+  num_row <- dim(image_matrix)[1]
+  num_col <- dim(image_matrix)[2]
+  image_matrix[image_matrix < threshold] <- 0 # zero entries of image below threshold
+  intensity_vec <- c(image_matrix)
+  cumulative_intensity_vec <- cumsum(intensity_vec)
+  total_intensity <- cumulative_intensity_vec[length(cumulative_intensity_vec)]
+  sample_intensities <- runif(num_points,0,total_intensity)
+  sample_intensities <- sort(sample_intensities)
+  sample_vec <- integer(length(intensity_vec))
+  c <- 1
+  for (i in 1 : num_points){
+    while (cumulative_intensity_vec[c] < sample_intensities[i]){
+      c <- c+1
+    }
+    sample_vec[c] <- 1
+  }
+  sample_vec
+  sample_matrix <- matrix(sample_vec, nrow=num_row, ncol=num_col)
+  num_sample <- sum(sum(sample_matrix))
+  sample_pts <- matrix(0, nrow = num_sample, ncol = 2)
+  c <- 1
+  for (i in 1 : num_row)
+    for (j in 1 : num_col)
+      if(sample_matrix[i,j] == 1){
+        sample_pts[c,] <- c(j,num_row+1-i)
+        c <- c+1
+      }
+  sample_pts  
+}
+
+pers_hom_filtered_graph <- function(edges,vertex_values){
+  # calculate the degree 0 persistence diagram for a filtered graph
+  # using the union-find algorithm
+  # input: 
+  #   edges: an E by 2 matrix, each row is an edge whose entries are the vertex numbers of its boundary
+  #   vertex_values: a vector of length V, entries are the scalar values (birth times) of each vertex
+  # output: an n by 2 matrix, each row is the birth value and death value or a persistence pair
+  
+  FIND <- function(i){
+    if (P[i] != i){
+      P[i] <<- FIND(P[i]) # superassignment to change global variable
+    }
+    return(P[i])
+  }
+  
+  UNION <- function(i,j,birth_vertex){
+    k <- FIND(i)
+    l <- FIND(j)
+    if (k != l){
+      if (vertex_values[k] > vertex_values[l]){
+        m <- k
+        k <- l
+        l <- m
+      }
+      P[l] <<- k
+      B[k] <<- birth_vertex
+      S[k] <<- S[k] + S[l]
+    }
+  }
+  
+  V <- length(vertex_values)
+  E <- dim(edges)[1]
+  
+  edge_values <- matrix(0,E,3)
+  for (i in 1:E){ 
+    edge_values[i,1] <- i
+    edge_values[i,2] <- max(vertex_values[edges[i,1]], vertex_values[edges[i,2]])
+    edge_values[i,3] <- min(vertex_values[edges[i,1]], vertex_values[edges[i,2]])
+  }
+  edge_values <- edge_values[order(edge_values[,2],-edge_values[,3]),] # sort edges
+  
+  P <- seq(1,V) # parent of vertex (vertex number of root of connected component)
+  B <- seq(1,V) # birth vertex (vertex number of oldest vertex in connected component - only correct for root vertex)
+  S <- rep(1,V) # size (number of vertices in connected component - only correct for root vertex)
+  
+  pd <- vector("list", length = 2*V)
+  bd_pairs <- 0
+  
+  c <- 1
+  for (c in 1:E){
+    e <- edge_values[c,1]
+    i <- edges[e,1]
+    j <- edges[e,2]
+    k <- FIND(i)
+    l <- FIND(j)
+    death_val <- max(vertex_values[i],vertex_values[j])
+    birth_val <- max(vertex_values[k],vertex_values[l])
+    if (vertex_values[k] < vertex_values[l]){
+      birth_vertex <- k
+    } else{
+      birth_vertex <- l
+    }
+    if (birth_val != death_val){
+      if (vertex_values[i] < vertex_values[j]){
+        death_vertex <- j
+      } else{
+        death_vertex <- i
+      }
+      pd[(bd_pairs*2+1):(bd_pairs*2+2)] <- c(birth_val,death_val) #,birth_vertex,death_vertex,death_val-birth_val,x,y,z)
+      bd_pairs <- bd_pairs+1
+    }
+    UNION(i,j,birth_vertex)
+  }
+  
+  pd <- unlist(pd)
+  pd <- matrix(pd, ncol = 2, byrow = TRUE)
 }

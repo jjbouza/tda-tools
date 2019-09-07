@@ -1,3 +1,6 @@
+#ifndef RIP_H
+#define RIP_H 
+
 /*
 Ripser: a lean C++ code for computation of Vietoris-Rips persistence barcodes
 
@@ -1137,3 +1140,5 @@ ripserResults rips_dm_sparse(int *I, int *J, float *V, int NEdges, int N,
   res.num_edges = num_edges;
   return res;
 }
+
+#endif

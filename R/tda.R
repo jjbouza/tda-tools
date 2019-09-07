@@ -1,6 +1,7 @@
 library('Rcpp')
 loadModule("Landscape", TRUE)
 loadModule("Diagram", TRUE)
+loadModule("H0", TRUE)
 
 
 myColorRamp <- function(colors, values) {
@@ -218,4 +219,14 @@ diagram_dm <- function(distances, dim_max=3, threshold=Inf, modulus=2, do_cocycl
 diagram_pc <- function(points, dim_max=3, threshold=Inf, modulus=2, do_cocycles=0){
 	distances <- as.vector(dist(points))
     rip_raw(as.vector(distances), modulus, dim_max, threshold, do_cocycles)
+}
+
+
+
+
+H0_from_complex <- function(edges, vertices) {
+    #make edges into array
+    edges <- as.vector(t(edges))
+    out <- H0_diagram_interface(edges, vertices)
+    return(out)
 }
