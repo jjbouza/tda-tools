@@ -83,7 +83,7 @@ The ```pd``` object also contains an ```pd$edges``` member which returns the num
 
 Here we will mainly use the function
 ```R
-landscape <- function(PersistenceDiagram, exact=FALSE, dx=0.1,  min_x= 0, max_x=10, max_y=1000)
+landscape <- function(PersistenceDiagram, exact=FALSE, dx=0.1,  min_x= 0, max_x=10, threshold=-1)
 ```
 which is the primary constructor for landscape objects. This function will not return an R array, but rather an object
 that encapsulates the landscape operations and data. This allows us to perform operations on different types of
