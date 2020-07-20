@@ -3,6 +3,13 @@ loadModule("Landscape", TRUE)
 loadModule("Diagram", TRUE)
 loadModule("H0", TRUE)
 
+landscape_discrete <- function(pd, dx=0.1,  min_x= 0, max_x=10, threshold=-1){
+    if(threshold==-1){
+        threshold <- Inf
+    }
+    pl <- landscape(pd, exact=FALSE, dx=dx, min_x=min_x, max_x=max_x, threshold=threshold)
+    return(pl$getDiscrete())
+}
 
 myColorRamp <- function(colors, values) {
 	library("wesanderson")
