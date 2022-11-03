@@ -24,7 +24,7 @@ for(i in 1:100){
 
 
 print('Computing average persistence...')
-pl_average = average(pl_list)
+pl_average = PLaverage(pl_list)
 PLplot(pl_average)
 d = pl$add(pl_average$scale(-1))
 
